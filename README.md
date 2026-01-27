@@ -52,6 +52,10 @@ python benchmarks/latency.py --tokens 8192 --runs 10
 python benchmarks/ratio.py --tokens 8192 --runs 10
 ```
 
+```bash
+python benchmarks/length_compare.py --tokens 8192 --runs 10 --lengths 2,3,4,5,6
+```
+
 ## Documentation
 
 - `docs/00-intent.md`
