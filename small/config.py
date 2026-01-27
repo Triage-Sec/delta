@@ -37,5 +37,6 @@ class CompressionConfig:
     patch_end_token: str = "</Patch>"
     patch_index_prefix: str = "<Idx:"
     patch_index_suffix: str = ">"
+    metrics_enabled: bool = True
     rng_seed: Optional[int] = None
     verify: bool = False

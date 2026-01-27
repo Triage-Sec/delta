@@ -42,6 +42,7 @@ class FuzzyDiscoveryStage(DiscoveryStage):
 @dataclass(frozen=True)
 class CompressionEngine:
     discovery_stages: tuple[DiscoveryStage, ...]
+    last_candidates_discovered: int = 0
 
     def compress_tokens(self, tokens: TokenSeq, config: CompressionConfig) -> tuple[list[Token], dict[Token, tuple[Token, ...]]]:
         for warning in validate_config(config):
@@ -49,11 +50,13 @@ class CompressionEngine:
         working_tokens = list(tokens)
         dictionary_map: dict[Token, tuple[Token, ...]] = {}
         depth_limit = config.hierarchical_max_depth if config.hierarchical_enabled else 1
+        total_candidates = 0
 
         for _ in range(depth_limit):
             candidates: list[Candidate] = []
             for stage in self.discovery_stages:
                 candidates.extend(stage.discover(working_tokens, config))
+            total_candidates += len(candidates)
             if not candidates:
                 break
             swap_result = perform_swaps(working_tokens, candidates, config)
@@ -64,6 +67,7 @@ class CompressionEngine:
             if not config.hierarchical_enabled:
                 break
 
+        object.__setattr__(self, "last_candidates_discovered", total_candidates)
         return working_tokens, dictionary_map
 
 

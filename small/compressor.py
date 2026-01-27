@@ -9,6 +9,7 @@ from .dictionary import build_body_tokens, build_dictionary_tokens
 from .ast_python import discover_ast_candidates
 from .domain import detect_domain
 from .engine import CompressionEngine, default_engine
+from .metrics import compute_metrics, log_metrics
 from .static_dicts import (
     DOMAIN_TO_STATIC_ID,
     get_static_dictionary,
@@ -97,13 +98,22 @@ def _compress_internal(
 
     working_tokens, dictionary_map = engine.compress_tokens(working_tokens, cfg)
 
-    dictionary_tokens = build_dictionary_tokens(dictionary_map, cfg)
+    dictionary_tokens = build_dictionary_tokens(dictionary_map, cfg) if dictionary_map or static_id else []
     body_tokens = working_tokens
     if static_id:
         marker = static_dictionary_marker(static_id, cfg)
-        compressed_tokens = [marker] + dictionary_tokens + body_tokens
-    else:
+        compressed_tokens = [marker] + (dictionary_tokens or [cfg.dict_start_token, cfg.dict_end_token]) + body_tokens
+    elif dictionary_tokens:
         compressed_tokens = dictionary_tokens + body_tokens
+    else:
+        compressed_tokens = body_tokens
+
+    if len(compressed_tokens) > len(tokens):
+        compressed_tokens = list(tokens)
+        dictionary_tokens = []
+        body_tokens = list(tokens)
+        dictionary_map = {}
+        static_id = None
 
     result = CompressionResult(
         compressed_tokens=compressed_tokens,
@@ -116,10 +126,21 @@ def _compress_internal(
         static_dictionary_id=static_id,
     )
 
+    if cfg.metrics_enabled:
+        metrics = compute_metrics(
+            original_length=len(tokens),
+            compressed_length=len(compressed_tokens),
+            dictionary_tokens=dictionary_tokens,
+            dictionary_map=dictionary_map,
+            body_tokens=body_tokens,
+            candidates_discovered=engine.last_candidates_discovered,
+            config=cfg,
+        )
+        result = CompressionResult(**{**result.__dict__, "metrics": metrics})
+        log_metrics(metrics)
+
     if cfg.verify:
-        roundtrip = decompress(compressed_tokens, cfg)
-        if list(roundtrip) != list(tokens):
-            raise ValueError("Round-trip verification failed.")
+        result.verify(tokens, cfg)
 
     return result
 
@@ -167,7 +188,9 @@ def decompress(tokens: Sequence[Token], config: CompressionConfig | None = None)
         static_dict = dict(entry.entries)
         idx = 1
     if idx >= len(tokens) or tokens[idx] != cfg.dict_start_token:
-        raise ValueError("Compressed sequence does not start with dictionary delimiter.")
+        if static_dict:
+            raise ValueError("Compressed sequence does not start with dictionary delimiter.")
+        return list(tokens)
 
     try:
         end_idx = tokens.index(cfg.dict_end_token, idx + 1)

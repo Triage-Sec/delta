@@ -38,3 +38,11 @@ class CompressionResult:
     original_length: int
     compressed_length: int
     static_dictionary_id: str | None = None
+    metrics: object | None = None
+
+    def verify(self, original_tokens: TokenSeq, config) -> None:
+        from .compressor import decompress
+
+        restored = decompress(self.compressed_tokens, config)
+        if list(restored) != list(original_tokens):
+            raise ValueError("Round-trip verification failed.")
