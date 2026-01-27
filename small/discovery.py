@@ -21,13 +21,14 @@ def _non_overlapping_positions(positions: Iterable[int], length: int) -> tuple[i
 
 
 def discover_candidates(tokens: TokenSeq, max_length: int, config: CompressionConfig | None = None) -> list[Candidate]:
-    if max_length < 2:
+    min_length = config.min_subsequence_length if config else 2
+    if max_length < min_length:
         return []
     n = len(tokens)
     candidates: list[Candidate] = []
     extra_cost = 1 if config and config.dict_length_enabled else 0
 
-    for length in range(max_length, 1, -1):
+    for length in range(max_length, min_length - 1, -1):
         if length > n:
             continue
         positions_by_subseq: dict[tuple[Token, ...], list[int]] = defaultdict(list)
