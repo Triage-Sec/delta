@@ -36,6 +36,12 @@ pip install -e .[dev]
 pytest
 ```
 
+## Example
+
+```bash
+python examples/basic.py
+```
+
 ## Documentation
 
 - `docs/00-intent.md`
