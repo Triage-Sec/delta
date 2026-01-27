@@ -42,6 +42,12 @@ pytest
 python examples/basic.py
 ```
 
+## Benchmark
+
+```bash
+python benchmarks/latency.py --tokens 8192 --runs 10
+```
+
 ## Documentation
 
 - `docs/00-intent.md`
