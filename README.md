@@ -77,3 +77,4 @@ python benchmarks/length_compare.py --corpus benchmarks/data/structured_corpus.t
 - `docs/08-training.md`
 - `docs/09-performance.md`
 - `docs/10-output-format.md`
+- `docs/11-testing.md`
