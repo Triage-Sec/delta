@@ -1,0 +1,23 @@
+class PolicyEngine:
+    def __init__(self, rules):
+        self.rules = rules
+
+    def evaluate(self, user, action, resource):
+        for rule in self.rules:
+            if rule.user == user and rule.action == action and rule.resource == resource:
+                if rule.effect == "allow":
+                    return True
+                if rule.effect == "deny":
+                    return False
+        return False
+
+def build_rules():
+    rules = []
+    for i in range(0, 50):
+        rules.append({"user": "alice", "action": "read", "resource": f"repo_{i}", "effect": "allow"})
+        rules.append({"user": "bob", "action": "read", "resource": f"repo_{i}", "effect": "deny"})
+    return rules
+
+engine = PolicyEngine(build_rules())
+result = engine.evaluate("alice", "read", "repo_10")
+result = engine.evaluate("bob", "read", "repo_10")

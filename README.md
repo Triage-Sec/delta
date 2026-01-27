@@ -53,6 +53,10 @@ python benchmarks/ratio.py --tokens 8192 --runs 10
 ```
 
 ```bash
+python benchmarks/ratio.py --corpus benchmarks/data/structured_corpus.txt --runs 1 --max-len 6
+```
+
+```bash
 python benchmarks/length_compare.py --tokens 8192 --runs 10 --lengths 2,3,4,5,6
 ```
 
