@@ -13,9 +13,12 @@ Small builds on "Lossless Token Sequence Compression via Meta-Tokens" by Harvill
 - Improve compression beyond baseline LTSC results.
 - Preserve perfect losslessness.
 - Keep compression fast and practical.
+- Target 35% or greater average compression on code and structured documents.
+- Target sub-100 ms compression latency for sequences up to 8192 tokens.
+- Keep task performance within 5% of uncompressed baselines after fine-tuning.
 
 ## Non-Negotiables
 
 - Lossless reconstruction must be verifiable.
 - The compression format must be learnable by transformers.
-- Efficiency matters; avoid pathological runtime behavior.
+- Efficiency matters; target O(n log n) worst-case behavior for core compression.

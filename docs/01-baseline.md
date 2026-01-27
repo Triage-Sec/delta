@@ -20,7 +20,7 @@ Small enforces this as a mandatory filter for all candidate patterns.
 
 1) **Discovery**
    - Enumerate candidate subsequences for lengths 2..max_len.
-   - Count non-overlapping occurrences per subsequence.
+   - Count non-overlapping occurrences per subsequence (no shared token positions).
    - Filter candidates by the compressibility condition.
    - Process lengths from longest to shortest.
 

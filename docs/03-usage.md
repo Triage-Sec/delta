@@ -8,6 +8,7 @@ Small operates on token sequences, not raw text. Tokens are represented as hasha
 2) Compress the token sequence.
 3) Feed compressed prompt to the model.
 4) Keep the answer uncompressed during fine-tuning.
+5) Compute loss only on answer tokens during fine-tuning.
 
 ## Notes
 
