@@ -37,3 +37,39 @@ def test_dictionary_delimiters_present():
     result = compress(tokens, cfg)
     assert result.dictionary_tokens[0] == cfg.dict_start_token
     assert result.dictionary_tokens[-1] == cfg.dict_end_token
+
+
+def test_decompress_rejects_duplicate_meta_tokens():
+    cfg = CompressionConfig()
+    tokens = [
+        cfg.dict_start_token,
+        "<MT_1>",
+        "a",
+        "<MT_1>",
+        "b",
+        cfg.dict_end_token,
+        "<MT_1>",
+    ]
+    try:
+        decompress(tokens, cfg)
+    except ValueError as exc:
+        assert "Duplicate meta-token" in str(exc)
+    else:
+        raise AssertionError("Expected error for duplicate meta-token.")
+
+
+def test_decompress_requires_meta_token_header():
+    cfg = CompressionConfig()
+    tokens = [
+        cfg.dict_start_token,
+        "a",
+        "b",
+        cfg.dict_end_token,
+        "c",
+    ]
+    try:
+        decompress(tokens, cfg)
+    except ValueError as exc:
+        assert "Dictionary entry missing meta-token" in str(exc)
+    else:
+        raise AssertionError("Expected error for missing meta-token header.")
