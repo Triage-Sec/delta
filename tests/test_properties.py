@@ -17,7 +17,7 @@ def test_round_trip_random_strings():
         length = rng.randint(0, 60)
         tokens = [rng.choice(vocab) for _ in range(length)]
         result = compress(tokens, cfg)
-        restored = decompress(result.compressed_tokens, cfg)
+        restored = decompress(result.serialized_tokens, cfg)
         assert restored == tokens
         assert result.compressed_length <= result.original_length
 
@@ -34,7 +34,7 @@ def test_round_trip_random_ints():
         length = rng.randint(0, 50)
         tokens = [rng.choice(vocab) for _ in range(length)]
         result = compress(tokens, cfg)
-        restored = decompress(result.compressed_tokens, cfg)
+        restored = decompress(result.serialized_tokens, cfg)
         assert restored == tokens
         assert result.compressed_length <= result.original_length
 
@@ -80,6 +80,6 @@ def test_edge_sequences():
     ]
     for tokens in cases:
         result = compress(tokens, cfg)
-        restored = decompress(result.compressed_tokens, cfg)
+        restored = decompress(result.serialized_tokens, cfg)
         assert restored == tokens
         assert result.compressed_length <= result.original_length

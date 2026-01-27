@@ -35,8 +35,8 @@ def build_example(
 ) -> TrainingExample:
     if compress_prompt:
         result = compress(prompt_tokens, config)
-        input_tokens = result.compressed_tokens + list(output_tokens)
-        loss_mask = [0] * len(result.compressed_tokens) + [1] * len(output_tokens)
+        input_tokens = result.serialized_tokens + list(output_tokens)
+        loss_mask = [0] * len(result.serialized_tokens) + [1] * len(output_tokens)
         return TrainingExample(
             input_tokens=input_tokens,
             target_tokens=list(output_tokens),

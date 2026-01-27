@@ -30,7 +30,9 @@ class Occurrence:
 
 @dataclass(frozen=True)
 class CompressionResult:
+    original_tokens: tuple[Token, ...]
     compressed_tokens: list[Token]
+    serialized_tokens: list[Token]
     dictionary_tokens: list[Token]
     body_tokens: list[Token]
     dictionary_map: dict[Token, tuple[Token, ...]]
@@ -39,10 +41,12 @@ class CompressionResult:
     compressed_length: int
     static_dictionary_id: str | None = None
     metrics: object | None = None
+    dictionary: object | None = None
 
-    def verify(self, original_tokens: TokenSeq, config) -> None:
+    def verify(self, original_tokens: TokenSeq | None, config) -> None:
         from .compressor import decompress
 
-        restored = decompress(self.compressed_tokens, config)
-        if list(restored) != list(original_tokens):
+        target = list(original_tokens) if original_tokens is not None else list(self.original_tokens)
+        restored = decompress(self.serialized_tokens, config)
+        if list(restored) != target:
             raise ValueError("Round-trip verification failed.")

@@ -6,10 +6,12 @@ from typing import Sequence
 
 from .config import CompressionConfig
 from .dictionary import build_body_tokens, build_dictionary_tokens
+from .dictionary_store import CompressionDictionary
 from .ast_python import discover_ast_candidates
 from .domain import detect_domain
 from .engine import CompressionEngine, default_engine
 from .metrics import compute_metrics, log_metrics
+from .serialization import serialize
 from .static_dicts import (
     DOMAIN_TO_STATIC_ID,
     get_static_dictionary,
@@ -98,38 +100,43 @@ def _compress_internal(
 
     working_tokens, dictionary_map = engine.compress_tokens(working_tokens, cfg)
 
-    dictionary_tokens = build_dictionary_tokens(dictionary_map, cfg) if dictionary_map or static_id else []
     body_tokens = working_tokens
-    if static_id:
-        marker = static_dictionary_marker(static_id, cfg)
-        compressed_tokens = [marker] + (dictionary_tokens or [cfg.dict_start_token, cfg.dict_end_token]) + body_tokens
-    elif dictionary_tokens:
-        compressed_tokens = dictionary_tokens + body_tokens
-    else:
-        compressed_tokens = body_tokens
+    dictionary = CompressionDictionary(meta_to_seq=dict(dictionary_map), seq_to_meta={}, max_entries=cfg.meta_token_pool_size)
+    for meta, subseq in dictionary_map.items():
+        dictionary.seq_to_meta[subseq] = meta
+    serialized = serialize(dictionary, body_tokens, cfg, static_dictionary_id=static_id)
+    compressed_tokens = list(body_tokens)
 
-    if len(compressed_tokens) > len(tokens):
+    if len(serialized.tokens) > len(tokens):
         compressed_tokens = list(tokens)
+        serialized_tokens = list(tokens)
         dictionary_tokens = []
         body_tokens = list(tokens)
         dictionary_map = {}
+        dictionary = CompressionDictionary(meta_to_seq={}, seq_to_meta={}, max_entries=cfg.meta_token_pool_size)
         static_id = None
+    else:
+        serialized_tokens = serialized.tokens
+        dictionary_tokens = serialized.dictionary_tokens
 
     result = CompressionResult(
+        original_tokens=tuple(tokens),
         compressed_tokens=compressed_tokens,
+        serialized_tokens=serialized_tokens,
         dictionary_tokens=dictionary_tokens,
         body_tokens=body_tokens,
         dictionary_map=dictionary_map,
         meta_tokens_used=tuple(dictionary_map.keys()),
         original_length=len(tokens),
-        compressed_length=len(compressed_tokens),
+        compressed_length=len(serialized_tokens),
         static_dictionary_id=static_id,
+        dictionary=dictionary,
     )
 
     if cfg.metrics_enabled:
         metrics = compute_metrics(
             original_length=len(tokens),
-            compressed_length=len(compressed_tokens),
+            compressed_length=len(serialized_tokens),
             dictionary_tokens=dictionary_tokens,
             dictionary_map=dictionary_map,
             body_tokens=body_tokens,
@@ -260,6 +267,48 @@ def decompress(tokens: Sequence[Token], config: CompressionConfig | None = None)
                     patches.append((patch_index, patch_value))
                     idx += 2
                 if idx >= len(body_tokens) or body_tokens[idx] != cfg.patch_end_token:
+                    raise ValueError("Patch section missing end delimiter.")
+                idx += 1
+                expanded = list(_expand_token(token, dictionary_map, cfg, memo))
+                for patch_index, patch_value in patches:
+                    if patch_index < 0 or patch_index >= len(expanded):
+                        raise ValueError("Patch index out of bounds.")
+                    expanded[patch_index] = patch_value
+                decoded.extend(expanded)
+                continue
+            decoded.extend(_expand_token(token, dictionary_map, cfg, memo))
+            idx += 1
+            continue
+        decoded.append(token)
+        idx += 1
+    return decoded
+
+
+def decompress_with_dictionary(
+    dictionary: dict[Token, tuple[Token, ...]],
+    body_tokens: Sequence[Token],
+    config: CompressionConfig | None = None,
+) -> list[Token]:
+    cfg = config or CompressionConfig()
+    dictionary_map: dict[Token, list[Token]] = {meta: list(seq) for meta, seq in dictionary.items()}
+    decoded: list[Token] = []
+    memo: dict[Token, list[Token]] = {}
+    idx = 0
+    body_list = list(body_tokens)
+    while idx < len(body_list):
+        token = body_list[idx]
+        if token in dictionary_map:
+            if idx + 1 < len(body_list) and body_list[idx + 1] == cfg.patch_start_token:
+                idx += 2
+                patches: list[tuple[int, Token]] = []
+                while idx < len(body_list) and body_list[idx] != cfg.patch_end_token:
+                    patch_index = parse_patch_index_token(body_list[idx], cfg)
+                    if idx + 1 >= len(body_list):
+                        raise ValueError("Patch entry missing replacement token.")
+                    patch_value = body_list[idx + 1]
+                    patches.append((patch_index, patch_value))
+                    idx += 2
+                if idx >= len(body_list) or body_list[idx] != cfg.patch_end_token:
                     raise ValueError("Patch section missing end delimiter.")
                 idx += 1
                 expanded = list(_expand_token(token, dictionary_map, cfg, memo))

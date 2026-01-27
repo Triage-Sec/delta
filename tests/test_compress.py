@@ -1,4 +1,4 @@
-from small import CompressionConfig, compress, compress_python_source, decompress
+from small import CompressionConfig, compress, compress_python_source, decompress, decompress_with_dictionary
 from small.utils import is_compressible
 
 
@@ -15,7 +15,7 @@ def test_round_trip_basic():
     tokens = ["a", "b", "c", "a", "b", "c", "a", "b", "c", "z"]
     cfg = CompressionConfig(max_subsequence_length=3, rng_seed=7, verify=True)
     result = compress(tokens, cfg)
-    restored = decompress(result.compressed_tokens, cfg)
+    restored = decompress(result.serialized_tokens, cfg)
     assert restored == tokens
     assert len(result.body_tokens) <= result.original_length
 
@@ -136,7 +136,7 @@ def test_compress_python_source_roundtrip():
     source = "def add(x, y):\n    return x + y\n"
     cfg = CompressionConfig(verify=True)
     tokens, result = compress_python_source(source, cfg)
-    restored = decompress(result.compressed_tokens, cfg)
+    restored = decompress(result.serialized_tokens, cfg)
     assert restored == tokens
 
 
@@ -170,3 +170,11 @@ def test_decompress_with_patch_section():
     ]
     restored = decompress(tokens, cfg)
     assert restored == ["a", "x", "c"]
+
+
+def test_decompress_with_dictionary_object():
+    cfg = CompressionConfig(static_dictionary_auto=False)
+    tokens = ["a", "b", "a", "b", "a", "b"]
+    result = compress(tokens, cfg)
+    restored = decompress_with_dictionary(result.dictionary_map, result.body_tokens, cfg)
+    assert restored == tokens
