@@ -5,7 +5,6 @@ from __future__ import annotations
 from collections import defaultdict
 
 from .config import CompressionConfig
-from .patterns import compute_savings
 from .suffix_array import build_suffix_array, lcp_intervals
 from .types import Candidate, TokenSeq
 from .utils import is_compressible

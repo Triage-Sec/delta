@@ -50,8 +50,9 @@ def discover_fuzzy_candidates(tokens: TokenSeq, config: CompressionConfig) -> li
     candidates: list[Candidate] = []
     n = len(tokens)
     max_len = config.max_subsequence_length
+    min_len = config.min_subsequence_length
 
-    for length in range(max_len, 1, -1):
+    for length in range(max_len, min_len - 1, -1):
         if length > n:
             continue
         positions_by_subseq: dict[tuple[Token, ...], list[int]] = {}

@@ -8,9 +8,7 @@ from .config import CompressionConfig
 from .dictionary import build_body_tokens, build_dictionary_tokens
 from .ast_python import discover_ast_candidates
 from .domain import detect_domain
-from .discovery import discover_candidates
-from .fuzzy import discover_fuzzy_candidates
-from .swap import perform_swaps
+from .engine import CompressionEngine, default_engine
 from .static_dicts import (
     DOMAIN_TO_STATIC_ID,
     get_static_dictionary,
@@ -30,11 +28,11 @@ def _apply_static_dictionary(
     tokens: list[Token],
     static_dict: dict[Token, tuple[Token, ...]],
     config: CompressionConfig,
-) -> tuple[list[Token], dict[int, tuple[int, Token]]]:
+) -> tuple[list[Token], dict[int, tuple[int, Token, tuple]]]:
     if any(token in static_dict for token in tokens):
         raise ValueError("Input sequence contains static meta-tokens.")
     occupied = [False] * len(tokens)
-    replacements: dict[int, tuple[int, Token]] = {}
+    replacements: dict[int, tuple[int, Token, tuple]] = {}
     entries = sorted(static_dict.items(), key=lambda item: len(item[1]), reverse=True)
     for meta, subseq in entries:
         if len(subseq) < config.static_dictionary_min_length:
@@ -78,7 +76,7 @@ def _compress_internal(
     working_tokens = list(tokens)
     static_id = _select_static_dictionary(working_tokens, cfg)
     static_dict = None
-    static_replacements: dict[int, tuple[int, Token]] = {}
+    static_replacements: dict[int, tuple[int, Token, tuple]] = {}
     if static_id:
         static_entry = get_static_dictionary(static_id)
         if static_entry is None:
@@ -86,24 +84,18 @@ def _compress_internal(
         static_dict = static_entry.entries
         working_tokens, static_replacements = _apply_static_dictionary(working_tokens, static_dict, cfg)
 
-    dictionary_map: dict[Token, tuple[Token, ...]] = {}
-    depth_limit = cfg.hierarchical_max_depth if cfg.hierarchical_enabled else 1
+    engine = default_engine(cfg)
+    if preferred_candidates:
+        # Prepend preferred candidates by injecting a temporary discovery stage.
+        class _PreferredStage:
+            name = "preferred"
 
-    for _ in range(depth_limit):
-        candidates = discover_candidates(working_tokens, cfg.max_subsequence_length, cfg)
-        if cfg.fuzzy_enabled:
-            candidates = discover_fuzzy_candidates(working_tokens, cfg) + candidates
-        if preferred_candidates:
-            candidates = preferred_candidates + candidates
-        if not candidates:
-            break
-        swap_result = perform_swaps(working_tokens, candidates, cfg)
-        if not swap_result.dictionary_map:
-            break
-        dictionary_map.update(swap_result.dictionary_map)
-        working_tokens = build_body_tokens(working_tokens, swap_result.replacements, cfg)
-        if not cfg.hierarchical_enabled:
-            break
+            def discover(self, tokens: TokenSeq, config: CompressionConfig) -> list:
+                return preferred_candidates
+
+        engine = CompressionEngine((_PreferredStage(),) + engine.discovery_stages)
+
+    working_tokens, dictionary_map = engine.compress_tokens(working_tokens, cfg)
 
     dictionary_tokens = build_dictionary_tokens(dictionary_map, cfg)
     body_tokens = working_tokens
