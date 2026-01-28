@@ -1,14 +1,27 @@
 [project]
 name = "small"
-version = "0.1.0"
-description = "Lossless Token Sequence Compression (LTSC) reference implementation"
+version = "0.2.0"
+description = "Lossless token sequence compression for large language models"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
   { name = "Triage-Sec" }
 ]
-keywords = ["ltsi", "compression", "tokens", "ltc", "llm"]
+keywords = ["llm", "compression", "tokens", "context", "inference", "transformers"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Text Processing :: General",
+  "Typing :: Typed",
+]
 
 dependencies = [
   "numpy>=1.24.0",

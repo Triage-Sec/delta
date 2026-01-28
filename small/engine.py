@@ -48,6 +48,7 @@ class FuzzyDiscoveryStage(DiscoveryStage):
 class CompressionEngine:
     discovery_stages: tuple[DiscoveryStage, ...]
     last_candidates_discovered: int = 0
+    min_improvement_ratio: float = 0.02  # Stop if < 2% improvement
 
     def compress_tokens(self, tokens: TokenSeq, config: CompressionConfig) -> tuple[list[Token], dict[Token, tuple[Token, ...]]]:
         for warning in validate_config(config):
@@ -56,8 +57,10 @@ class CompressionEngine:
         dictionary_map: dict[Token, tuple[Token, ...]] = {}
         depth_limit = config.hierarchical_max_depth if config.hierarchical_enabled else 1
         total_candidates = 0
+        
+        prev_length = len(working_tokens)
 
-        for _ in range(depth_limit):
+        for depth in range(depth_limit):
             candidates: list[Candidate] = []
             for stage in self.discovery_stages:
                 candidates.extend(stage.discover(working_tokens, config))
@@ -69,6 +72,16 @@ class CompressionEngine:
                 break
             dictionary_map.update(swap_result.dictionary_map)
             working_tokens = build_body_tokens(working_tokens, swap_result.replacements, config)
+            
+            # Early stopping: check for diminishing returns
+            new_length = len(working_tokens)
+            if prev_length > 0:
+                improvement = (prev_length - new_length) / prev_length
+                if improvement < self.min_improvement_ratio and depth > 0:
+                    # Not enough improvement to justify another pass
+                    break
+            prev_length = new_length
+            
             if not config.hierarchical_enabled:
                 break
 

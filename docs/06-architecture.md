@@ -1,69 +1,276 @@
 # System Architecture
 
+## Overview
+
+Small is structured as a modular pipeline where each stage has explicit input/output contracts and can be independently configured or replaced.
+
+```
+┌─────────────┐    ┌───────────────┐    ┌────────────────┐    ┌─────────────┐    ┌────────────────┐
+│ Tokenization│ -> │   Discovery   │ -> │   Selection    │ -> │ Replacement │ -> │  Serialization │
+│  (external) │    │ (candidates)  │    │ (occurrences)  │    │ (dictionary)│    │    (output)    │
+└─────────────┘    └───────────────┘    └────────────────┘    └─────────────┘    └────────────────┘
+                           │                    │
+                           ▼                    ▼
+                   ┌───────────────┐    ┌────────────────┐
+                   │  Subsumption  │    │   Importance   │
+                   │   Analysis    │    │    Scoring     │
+                   └───────────────┘    └────────────────┘
+```
+
 ## Pipeline Stages
 
-Small is structured as a pipeline of independent stages:
+### 1. Tokenization
 
-1) Tokenization (external adapter)
-2) Pattern discovery
-3) Pattern selection
-4) Replacement and dictionary construction
-5) Verification (optional)
+External tokenizers convert text to token sequences. Small operates on any hashable token type.
 
-Each stage has explicit input/output contracts and can be swapped or composed.
+**Adapters** (`small/tokenizer.py`):
+- Hugging Face Transformers
+- tiktoken (OpenAI)
+- SentencePiece
 
-## Tokenizer Interface
+### 2. Pattern Discovery
 
-`small.tokenizer` defines adapters that support:
+Discovery stages produce `Candidate` objects with subsequences and positions.
 
-- `encode(text) -> tokens`
-- `decode(tokens) -> text`
-- `vocab_size()`
-- `is_special_token(token)`
+**Implementations**:
 
-Adapters include Hugging Face, tiktoken, and SentencePiece.
+| Module | Strategy | Complexity | Best For |
+|--------|----------|------------|----------|
+| `discovery_sa.py` | Suffix array + LCP | O(n log n) | General use |
+| `discovery.py` | Sliding window | O(n × L) | Small inputs |
+| `bpe_discovery.py` | BPE-style merging | O(n × iterations) | Hierarchical patterns |
+| `ast_python.py` | AST analysis | O(n) | Python code |
+| `fuzzy.py` | Near-duplicate clustering | O(n²) | Noisy inputs |
 
-## Pattern Discovery
+### 3. Pattern Selection
 
-Discovery stages return candidates with subsequences and positions. Implementations include:
+Selection strategies choose non-overlapping occurrences that maximize compression.
 
-- Exact discovery (suffix array or sliding window)
-- Fuzzy discovery (near-duplicate clustering + patches)
-- AST discovery (Python)
+**Implementations** (`selection.py`, `selection_ilp.py`):
 
-## Pattern Selection
+| Mode | Algorithm | Complexity | Guarantee |
+|------|-----------|------------|-----------|
+| `greedy` | Savings-density sort | O(n log n) | Local optimal |
+| `optimal` | Weighted interval DP | O(n log n) | Optimal for fixed patterns |
+| `beam` | Beam search | O(n × width) | Bounded exploration |
+| `ilp` | Integer LP | Exponential | Global optimal |
 
-Selection strategies are configurable via `selection_mode`:
+### 4. Replacement
 
-- `greedy`
-- `optimal` (weighted interval scheduling)
-- `beam`
+Builds the dictionary and substitutes patterns with meta-tokens.
 
-## Compression Dictionary
+**Components**:
+- `swap.py`: Performs token substitutions
+- `dictionary.py`: Manages dictionary construction
+- `dictionary_store.py`: Hierarchical ordering
 
-`CompressionDictionary` provides:
+### 5. Serialization
 
-- Meta-token to subsequence lookup
-- Subsequence to meta-token lookup
-- Hierarchical ordering
-- Size limits
+Produces the final compressed output format.
 
-## Efficient Substring Search
+**Output structure**:
+```
+[static_marker?] <Dict> [entries...] </Dict> [body...]
+```
 
-Suffix arrays and LCP arrays are used for discovery:
+## Engine Architecture
 
-- `build_suffix_array` uses the doubling algorithm.
-- `lcp_intervals` enumerates repeated substring ranges.
-- For hierarchical passes, suffix arrays are rebuilt on the new sequence.
+The `CompressionEngine` orchestrates the pipeline:
 
-## Configuration Defaults
+```python
+@dataclass(frozen=True)
+class CompressionEngine:
+    discovery_stages: tuple[DiscoveryStage, ...]
+    min_improvement_ratio: float = 0.02
+    
+    def compress_tokens(self, tokens, config) -> (body, dictionary):
+        for depth in range(max_depth):
+            candidates = self.discover(tokens, config)
+            if not candidates:
+                break
+            
+            selected = select_occurrences(candidates, config)
+            tokens = apply_substitutions(tokens, selected)
+            
+            if improvement < min_improvement_ratio:
+                break
+        
+        return tokens, dictionary
+```
 
-Key defaults:
+## ML Integration Points
 
-- min subsequence length: 2
-- max subsequence length: 8
-- max meta-tokens: 500
-- max hierarchical depth: 3
-- selection mode: greedy
+### Subsumption Analysis
 
-Configuration validation raises on invalid settings and emits warnings for suboptimal choices.
+Removes redundant patterns before selection:
+
+```
+candidates → subsumption_graph → pruned_candidates → selection
+```
+
+### Importance Scoring
+
+Adjusts selection priorities based on semantic importance:
+
+```
+candidates → importance_scorer → adjusted_priorities → selection
+```
+
+### Region-Aware Compression
+
+Applies different strategies to different input regions:
+
+```
+tokens → detect_regions → filter_candidates_by_region → selection
+```
+
+### Quality Prediction
+
+Validates compression before output:
+
+```
+result → quality_predictor → decision (compress/skip)
+```
+
+## Configuration System
+
+`CompressionConfig` is an immutable dataclass with validation:
+
+```python
+config = CompressionConfig(
+    # Core settings
+    min_subsequence_length=2,
+    max_subsequence_length=8,
+    
+    # Algorithm selection
+    discovery_mode="suffix-array",
+    selection_mode="greedy",
+    
+    # Features
+    hierarchical_enabled=True,
+    enable_subsumption_pruning=True,
+    use_importance_scoring=False,
+)
+```
+
+Validation raises on invalid settings:
+- `min_subsequence_length < 2`
+- `max_subsequence_length < min_subsequence_length`
+- Unknown selection mode
+
+## Data Flow
+
+### Compression Flow
+
+```
+Input tokens
+     │
+     ▼
+┌────────────────────────────────────────┐
+│           Discovery Stage              │
+│  suffix_array → lcp_intervals → filter │
+└────────────────┬───────────────────────┘
+                 │ list[Candidate]
+                 ▼
+┌────────────────────────────────────────┐
+│         Subsumption Pruning            │
+│   build_graph → prune_subsumed         │
+└────────────────┬───────────────────────┘
+                 │ list[Candidate]
+                 ▼
+┌────────────────────────────────────────┐
+│          Selection Stage               │
+│   build_occurrences → select_algo      │
+└────────────────┬───────────────────────┘
+                 │ list[Occurrence]
+                 ▼
+┌────────────────────────────────────────┐
+│          Replacement Stage             │
+│   build_dictionary → substitute        │
+└────────────────┬───────────────────────┘
+                 │ (body, dictionary)
+                 ▼
+┌────────────────────────────────────────┐
+│         Serialization Stage            │
+│   format_dict → concat_body            │
+└────────────────┬───────────────────────┘
+                 │
+                 ▼
+Output: serialized_tokens
+```
+
+### Decompression Flow
+
+```
+Compressed tokens
+     │
+     ▼
+┌────────────────────────────────────────┐
+│           Parse Dictionary             │
+│  find_delimiters → extract_entries     │
+└────────────────┬───────────────────────┘
+                 │ dict[meta → sequence]
+                 ▼
+┌────────────────────────────────────────┐
+│            Expand Body                 │
+│   for token in body: expand(token)     │
+└────────────────┬───────────────────────┘
+                 │
+                 ▼
+Output: original_tokens
+```
+
+## Extension Points
+
+### Custom Discovery
+
+```python
+@dataclass(frozen=True)
+class CustomDiscoveryStage(DiscoveryStage):
+    def discover(self, tokens, config) -> list[Candidate]:
+        # Custom implementation
+        return candidates
+```
+
+### Custom Selection
+
+```python
+if config.selection_mode == "custom":
+    from mymodule import custom_select
+    selected = custom_select(occurrences, config)
+```
+
+### Custom Importance Scorer
+
+```python
+class MyScorer:
+    def score_patterns(self, tokens, candidates) -> list[float]:
+        return [my_score(c) for c in candidates]
+```
+
+## Performance Characteristics
+
+### Time Complexity
+
+| Operation | Complexity |
+|-----------|------------|
+| Suffix array build | O(n log n) |
+| LCP computation | O(n) |
+| Greedy selection | O(n log n) |
+| Hierarchical (d passes) | O(d × n log n) |
+
+### Space Complexity
+
+| Structure | Size |
+|-----------|------|
+| Suffix array | O(n) |
+| LCP array | O(n) |
+| Candidate list | O(k) where k = unique patterns |
+| Dictionary | O(m × L) where m = selected patterns |
+
+### Optimization Notes
+
+- Suffix array uses numpy for inputs > 1000 tokens
+- Parallel discovery uses ProcessPoolExecutor for inputs > 5000 tokens
+- Early stopping triggers when improvement < 2% per pass
+- ILP solver times out after 1 second by default

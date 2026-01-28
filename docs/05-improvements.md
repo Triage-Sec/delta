@@ -1,33 +1,83 @@
-# Part 3 Improvements
+# Improvements and Extensions
 
-## Hierarchical Compression
+This document summarizes the major improvements and research-grade extensions available in Small, organized by impact and scope.
 
-- Compression runs in multiple passes, allowing meta-tokens to reference previously defined meta-tokens.
-- Dictionary entries include explicit length tokens to disambiguate nested references.
-- Dictionary ordering is topologically sorted so dependencies appear before dependent entries.
+## Critical Algorithmic Fixes
 
-## Grammar-Aware Compression (Python)
+### Selection Correctness
 
-- Python source can be parsed into an AST to identify structurally identical subtrees.
-- Subtree hashes normalize identifiers and literals, focusing on structure.
-- Token ranges for repeated subtrees are prioritized in compression.
-- Entry point: `compress_python_source`.
+- Compressibility checks are now integrated into selection rather than post-filtering, preventing wasted selection capacity.
+- Weighted selection uses marginal savings that account for dictionary overhead.
+- Greedy selection uses a savings-density heuristic to prefer higher-value patterns.
 
-## Optimal Subsequence Selection
+### Hierarchical Early Stopping
 
-- `selection_mode` controls how non-overlapping occurrences are chosen:
-  - `greedy`: fast baseline.
-  - `optimal`: weighted interval scheduling for maximal savings.
-  - `beam`: beam search for a middle ground.
+- Hierarchical compression stops early when improvement falls below a threshold.
+- Prevents unnecessary passes and reduces latency on diminishing returns.
 
-## Static Domain Dictionaries
+## Pattern Discovery Improvements
 
-- Static dictionaries capture common patterns and avoid per-prompt dictionary overhead.
-- Compressed output starts with a static dictionary marker token when used.
-- Auto-detection uses conservative heuristics; it only applies a static dictionary above a confidence threshold.
+### Suffix Array Optimization
 
-## Fuzzy Matching (Minimal)
+- Maximal repeat extraction avoids generating all lengths for each LCP interval.
+- Reduces candidate explosion on highly repetitive inputs.
 
-- Fuzzy matching groups near-duplicate subsequences by signature and Hamming distance.
-- A canonical subsequence is stored in the dictionary; occurrences emit patches for differences.
-- Patch encoding uses `<Patch>` delimiters and indexed replacement tokens.
+### BPE-Style Iterative Discovery
+
+- Iteratively merges the most beneficial adjacent pairs.
+- Captures hierarchical patterns that one-shot discovery can miss.
+- Useful for structured inputs and code repetition.
+
+## Selection Enhancements
+
+### ILP-Based Selection (Optional)
+
+- Integer Linear Programming finds globally optimal non-overlapping patterns.
+- Enforces compressibility constraints directly in the optimizer.
+- Falls back to beam search if `scipy` is unavailable or timeouts occur.
+
+### Beam Search with Marginal Savings
+
+- Beam search evaluates marginal gains to balance exploration and efficiency.
+- More stable than naive greedy on overlapping high-value candidates.
+
+## Subsumption Analysis
+
+- Detects and removes patterns fully subsumed by longer patterns.
+- Keeps shorter patterns only if they have independent occurrences.
+- Reduces dictionary size and redundancy.
+
+## ML Integration Features
+
+### Pattern Importance Scoring
+
+- Scores candidates by positional, frequency, length, or embedding-based signals.
+- Adjusts compression priority to preserve semantically critical regions.
+
+### Region-Aware Compression
+
+- Detects semantic regions (SYSTEM, USER, CONTEXT, CODE, DATA).
+- Applies different compression priorities per region.
+
+### Quality Prediction
+
+- Predicts downstream impact of compression using heuristic signals.
+- Returns a recommendation: `compress`, `partial`, or `skip`.
+
+## Performance Optimizations
+
+### Parallel Discovery (Process-Based)
+
+- ProcessPoolExecutor for true parallelism on CPU-bound discovery.
+- Chunk overlap handling ensures correctness across boundaries.
+
+### NumPy Suffix Arrays
+
+- `suffix_array_fast.py` uses numpy for faster suffix array construction.
+- 2–5x speedup on large inputs (> 1K tokens).
+
+## Compatibility and Stability
+
+- All improvements preserve strict losslessness.
+- Backwards compatible with existing serialized format.
+- Configurable feature flags allow safe incremental adoption.
