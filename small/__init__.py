@@ -10,6 +10,9 @@ from .vocab import VocabExtension, plan_vocab_extension
 from .types import CompressionResult
 from .corpus import CorpusDocument, load_directory, load_jsonl
 from .preprocess import PreprocessConfig, preprocess_corpus
+from .analysis import AnalysisConfig, compute_document_weights
+from .static_dict_builder import StaticDictionaryConfig, build_static_dictionary
+from .static_dict_io import load_static_dictionary, save_static_dictionary
 from .embeddings import (
     CohereEmbeddingProvider,
     EmbeddingProvider,
@@ -49,6 +52,12 @@ __all__ = [
     "load_jsonl",
     "PreprocessConfig",
     "preprocess_corpus",
+    "AnalysisConfig",
+    "compute_document_weights",
+    "StaticDictionaryConfig",
+    "build_static_dictionary",
+    "save_static_dictionary",
+    "load_static_dictionary",
     "EmbeddingProvider",
     "HuggingFaceEmbeddingProvider",
     "OllamaEmbeddingProvider",

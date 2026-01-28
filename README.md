@@ -80,3 +80,4 @@ python benchmarks/length_compare.py --corpus benchmarks/data/structured_corpus.t
 - `docs/11-testing.md`
 - `docs/12-sequencing.md`
 - `docs/13-final-notes.md`
+- `docs/14-offline-analysis.md`
