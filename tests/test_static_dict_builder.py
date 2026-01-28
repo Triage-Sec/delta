@@ -4,8 +4,8 @@ from small.static_dict_builder import StaticDictionaryConfig, build_static_dicti
 
 def test_static_dictionary_builder_basic():
     corpus = [
-        ["a", "b", "a", "b", "a", "b"],
-        ["a", "b", "c", "a", "b", "c"],
+        ["a", "b", "c", "d", "a", "b", "c", "d"],
+        ["a", "b", "c", "d", "a", "b", "c", "d"],
     ]
     weights = [1.0, 1.0]
     cfg = CompressionConfig(static_dictionary_auto=False, dict_length_enabled=False)

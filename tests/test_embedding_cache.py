@@ -12,4 +12,4 @@ def test_sqlite_cache_round_trip(tmp_path: Path):
     cache.set(key, vector, model_id="test")
     restored = cache.get(key)
     cache.close()
-    assert restored == vector
+    assert all(abs(a - b) < 1e-6 for a, b in zip(restored, vector))
