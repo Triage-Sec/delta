@@ -36,6 +36,25 @@ pip install -e .[dev]
 pytest
 ```
 
+## Installation Extras
+
+```bash
+# Tokenizers
+pip install -e .[tokenizers]
+
+# Embedding-based analysis
+pip install -e .[embeddings]
+
+# Full analysis toolkit
+pip install -e .[analysis]
+
+# Training utilities
+pip install -e .[training]
+
+# Everything
+pip install -e .[all]
+```
+
 ## Example
 
 ```bash
