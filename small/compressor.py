@@ -148,8 +148,12 @@ def _compress_internal(
         log_metrics(metrics)
         if cfg.metrics_jsonl_path:
             write_metrics_jsonl(cfg.metrics_jsonl_path, metrics)
-        if cfg.combined_metrics_jsonl_path and cfg.cache_stats:
-            write_combined_metrics_jsonl(cfg.combined_metrics_jsonl_path, metrics, cfg.cache_stats)
+        cache_stats = cfg.cache_stats
+        if cache_stats is None and cfg.cache_stats_source is not None:
+            if hasattr(cfg.cache_stats_source, "stats"):
+                cache_stats = cfg.cache_stats_source.stats()
+        if cfg.combined_metrics_jsonl_path and cache_stats:
+            write_combined_metrics_jsonl(cfg.combined_metrics_jsonl_path, metrics, cache_stats)
 
     if cfg.verify:
         result.verify(tokens, cfg)
