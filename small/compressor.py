@@ -11,6 +11,7 @@ from .ast_python import discover_ast_candidates
 from .domain import detect_domain
 from .engine import CompressionEngine, default_engine
 from .metrics import compute_metrics, log_metrics
+from .metrics_writer import write_metrics_jsonl
 from .serialization import serialize
 from .static_dicts import (
     DOMAIN_TO_STATIC_ID,
@@ -145,6 +146,8 @@ def _compress_internal(
         )
         result = CompressionResult(**{**result.__dict__, "metrics": metrics})
         log_metrics(metrics)
+        if cfg.metrics_jsonl_path:
+            write_metrics_jsonl(cfg.metrics_jsonl_path, metrics)
 
     if cfg.verify:
         result.verify(tokens, cfg)
