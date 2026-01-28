@@ -20,6 +20,7 @@ from .metrics_writer import (
     write_offline_metrics_jsonl,
     write_combined_metrics_jsonl,
 )
+from .config_helpers import with_cache_stats_source
 from .embeddings import (
     CohereEmbeddingProvider,
     EmbeddingProvider,
@@ -71,6 +72,7 @@ __all__ = [
     "write_metrics_jsonl",
     "write_offline_metrics_jsonl",
     "write_combined_metrics_jsonl",
+    "with_cache_stats_source",
     "EmbeddingProvider",
     "HuggingFaceEmbeddingProvider",
     "OllamaEmbeddingProvider",
