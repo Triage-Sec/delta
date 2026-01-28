@@ -39,6 +39,8 @@ class CompressionConfig:
     patch_index_suffix: str = ">"
     metrics_enabled: bool = True
     metrics_jsonl_path: str | None = None
+    combined_metrics_jsonl_path: str | None = None
+    cache_stats: dict[str, int] | None = None
     discovery_mode: str = "suffix-array"
     parallel_discovery: bool = False
     parallel_length_threshold: int = 20000

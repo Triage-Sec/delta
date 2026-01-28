@@ -11,7 +11,7 @@ from .ast_python import discover_ast_candidates
 from .domain import detect_domain
 from .engine import CompressionEngine, default_engine
 from .metrics import compute_metrics, log_metrics
-from .metrics_writer import write_metrics_jsonl
+from .metrics_writer import write_combined_metrics_jsonl, write_metrics_jsonl
 from .serialization import serialize
 from .static_dicts import (
     DOMAIN_TO_STATIC_ID,
@@ -148,6 +148,8 @@ def _compress_internal(
         log_metrics(metrics)
         if cfg.metrics_jsonl_path:
             write_metrics_jsonl(cfg.metrics_jsonl_path, metrics)
+        if cfg.combined_metrics_jsonl_path and cfg.cache_stats:
+            write_combined_metrics_jsonl(cfg.combined_metrics_jsonl_path, metrics, cfg.cache_stats)
 
     if cfg.verify:
         result.verify(tokens, cfg)
