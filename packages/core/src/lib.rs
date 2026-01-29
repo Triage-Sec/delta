@@ -351,19 +351,22 @@ mod tests {
 
     #[test]
     fn test_compress_simple() {
-        let tokens = vec![1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3];
+        // Use larger input to overcome dictionary overhead
+        let pattern = vec![1, 2, 3, 4, 5];
+        let tokens: Vec<Token> = pattern.iter().cycle().take(50).cloned().collect();
         let config = CompressionConfig::default();
 
         let result = compress_internal(&tokens, &config, 0xFFFF0000).unwrap();
 
-        // Should achieve compression
+        // Should achieve compression with sufficient repetition
         assert!(result.compressed_length < result.original_length);
         assert!(result.compression_ratio() < 1.0);
     }
 
     #[test]
     fn test_round_trip() {
-        let tokens = vec![1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3];
+        let pattern = vec![1, 2, 3, 4, 5];
+        let tokens: Vec<Token> = pattern.iter().cycle().take(50).cloned().collect();
         let config = CompressionConfig {
             verify: true,
             ..Default::default()
