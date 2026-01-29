@@ -1,0 +1,28 @@
+{
+  "id": "json-v1",
+  "version": "1.0.0",
+  "name": "JSON/API Dictionary",
+  "description": "Pre-built patterns for JSON and API schema compression",
+  "entries": [
+    {"metaToken": 4294934528, "pattern": [788, 25]},
+    {"metaToken": 4294934529, "pattern": [330, 25]},
+    {"metaToken": 4294934530, "pattern": [837, 220]},
+    {"metaToken": 4294934531, "pattern": [1025, 220]},
+    {"metaToken": 4294934532, "pattern": [498, 220]},
+    {"metaToken": 4294934533, "pattern": [1115, 220]},
+    {"metaToken": 4294934534, "pattern": [14196, 220]},
+    {"metaToken": 4294934535, "pattern": [27, 198]},
+    {"metaToken": 4294934536, "pattern": [220, 220]},
+    {"metaToken": 4294934537, "pattern": [220, 220, 220, 220]},
+    {"metaToken": 4294934538, "pattern": [6660, 788]},
+    {"metaToken": 4294934539, "pattern": [828, 330]},
+    {"metaToken": 4294934540, "pattern": [1, 330]},
+    {"metaToken": 4294934541, "pattern": [330, 1374]},
+    {"metaToken": 4294934542, "pattern": [14196, 2970]},
+    {"metaToken": 4294934543, "pattern": [198, 198]},
+    {"metaToken": 4294934544, "pattern": [220, 498]},
+    {"metaToken": 4294934545, "pattern": [330, 788]},
+    {"metaToken": 4294934546, "pattern": [788, 1374]},
+    {"metaToken": 4294934547, "pattern": [330, 837]}
+  ]
+}

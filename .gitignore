@@ -1,6 +1,23 @@
-__pycache__/
-*.pyc
-.pytest_cache/
-.venv/
-.DS_Store
 *.egg-info/
+dist/
+build/
+
+# Node.js
+node_modules/
+*.tgz
+.npm/
+package-lock.json
+
+# Rust/WASM
+target/
+packages/core/Cargo.lock
+packages/sdk/src/wasm/pkg/
+packages/sdk/src/wasm/pkg-node/
+packages/sdk/src/wasm/pkg-web/
+*.wasm
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

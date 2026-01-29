@@ -1,0 +1,28 @@
+{
+  "id": "sql-v1",
+  "version": "1.0.0",
+  "name": "SQL Dictionary",
+  "description": "Pre-built patterns for SQL query compression",
+  "entries": [
+    {"metaToken": 4294934528, "pattern": [4963, 198]},
+    {"metaToken": 4294934529, "pattern": [3963, 198]},
+    {"metaToken": 4294934530, "pattern": [33067, 198]},
+    {"metaToken": 4294934531, "pattern": [11075, 198]},
+    {"metaToken": 4294934532, "pattern": [12038, 198]},
+    {"metaToken": 4294934533, "pattern": [40462, 198]},
+    {"metaToken": 4294934534, "pattern": [4276, 198]},
+    {"metaToken": 4294934535, "pattern": [40114, 198]},
+    {"metaToken": 4294934536, "pattern": [5765, 220]},
+    {"metaToken": 4294934537, "pattern": [37094, 198]},
+    {"metaToken": 4294934538, "pattern": [3740, 198]},
+    {"metaToken": 4294934539, "pattern": [9149, 198]},
+    {"metaToken": 4294934540, "pattern": [220, 220, 220, 220]},
+    {"metaToken": 4294934541, "pattern": [3740, 11075]},
+    {"metaToken": 4294934542, "pattern": [198, 198]},
+    {"metaToken": 4294934543, "pattern": [9829, 11]},
+    {"metaToken": 4294934544, "pattern": [29766, 11]},
+    {"metaToken": 4294934545, "pattern": [26717, 11]},
+    {"metaToken": 4294934546, "pattern": [6657, 11]},
+    {"metaToken": 4294934547, "pattern": [3740, 4963]}
+  ]
+}

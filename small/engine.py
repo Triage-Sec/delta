@@ -11,6 +11,18 @@ from .discovery import discover_candidates, discover_candidates_chunked
 from .discovery_parallel import discover_candidates_parallel
 from .discovery_sa import discover_candidates_sa
 from .fuzzy import discover_fuzzy_candidates
+from .adaptive import (
+    detect_regions,
+    detect_regions_heuristic,
+    filter_candidates_by_region,
+    RegionType,
+)
+from .pattern_importance import (
+    create_default_scorer,
+    adjust_candidate_priorities,
+    filter_high_importance_candidates,
+)
+from .subsumption import prune_subsumed_candidates, deduplicate_candidates
 from .swap import perform_swaps
 from .types import Candidate, Token, TokenSeq
 from .validation import validate_config
@@ -49,6 +61,7 @@ class CompressionEngine:
     discovery_stages: tuple[DiscoveryStage, ...]
     last_candidates_discovered: int = 0
     min_improvement_ratio: float = 0.02  # Stop if < 2% improvement
+    min_efficiency_ratio: float = 1.5  # Stop if body_savings/dict_growth < this
 
     def compress_tokens(self, tokens: TokenSeq, config: CompressionConfig) -> tuple[list[Token], dict[Token, tuple[Token, ...]]]:
         for warning in validate_config(config):
@@ -59,28 +72,114 @@ class CompressionEngine:
         total_candidates = 0
         
         prev_length = len(working_tokens)
+        prev_dict_size = 0  # Track dictionary growth
 
         for depth in range(depth_limit):
             candidates: list[Candidate] = []
             for stage in self.discovery_stages:
                 candidates.extend(stage.discover(working_tokens, config))
+            
+            if not candidates:
+                break
+            
+            # Deduplicate candidates from different discovery stages
+            candidates = deduplicate_candidates(candidates)
+            
+            # Adaptive region-aware compression
+            if config.enable_adaptive_regions and candidates:
+                # Detect regions in the input
+                if config.region_markers:
+                    # Convert string region types to RegionType enum
+                    marker_mapping = {
+                        marker: RegionType(region_type) 
+                        for marker, region_type in config.region_markers.items()
+                    }
+                    regions = detect_regions(working_tokens, markers=marker_mapping)
+                else:
+                    regions = detect_regions(working_tokens)
+                
+                # Fall back to heuristic detection if no regions found
+                if not regions:
+                    regions = detect_regions_heuristic(
+                        working_tokens,
+                        system_fraction=config.adaptive_system_fraction,
+                    )
+                
+                # Filter and adjust candidates based on regions
+                if regions:
+                    candidates = filter_candidates_by_region(
+                        candidates, regions, working_tokens
+                    )
+            
+            # Prune subsumed patterns to reduce dictionary redundancy
+            if config.enable_subsumption_pruning:
+                candidates = prune_subsumed_candidates(
+                    candidates,
+                    config,
+                    min_independent_occurrences=config.subsumption_min_independent,
+                )
+            
+            # ML integration: Score pattern importance and adjust priorities
+            if config.use_importance_scoring and candidates:
+                scorer = create_default_scorer()
+                importance_scores = scorer.score_patterns(working_tokens, candidates)
+                
+                # Filter out high-importance patterns (semantically critical)
+                if config.importance_filter_threshold < 1.0:
+                    candidates = filter_high_importance_candidates(
+                        candidates,
+                        importance_scores,
+                        threshold=config.importance_filter_threshold,
+                    )
+                    # Recompute scores for remaining candidates
+                    if candidates:
+                        importance_scores = scorer.score_patterns(working_tokens, candidates)
+                
+                # Adjust priorities based on importance (low importance = compress more)
+                if candidates and importance_scores:
+                    candidates = adjust_candidate_priorities(
+                        candidates,
+                        importance_scores,
+                        importance_weight=config.importance_weight,
+                    )
+            
             total_candidates += len(candidates)
             if not candidates:
                 break
+            
             swap_result = perform_swaps(working_tokens, candidates, config)
             if not swap_result.dictionary_map:
                 break
             dictionary_map.update(swap_result.dictionary_map)
             working_tokens = build_body_tokens(working_tokens, swap_result.replacements, config)
             
-            # Early stopping: check for diminishing returns
+            # Early stopping: check for diminishing returns using multiple criteria
             new_length = len(working_tokens)
-            if prev_length > 0:
+            new_dict_size = sum(
+                1 + len(seq) + (1 if config.dict_length_enabled else 0)
+                for seq in swap_result.dictionary_map.values()
+            )
+            
+            if prev_length > 0 and depth > 0:
+                # Criterion 1: Relative improvement in body size
                 improvement = (prev_length - new_length) / prev_length
-                if improvement < self.min_improvement_ratio and depth > 0:
-                    # Not enough improvement to justify another pass
+                
+                # Criterion 2: Efficiency ratio (body savings vs dictionary growth)
+                body_savings = prev_length - new_length
+                dict_growth = new_dict_size
+                efficiency = body_savings / dict_growth if dict_growth > 0 else float('inf')
+                
+                # Stop if either:
+                # 1. Body improvement is too small, OR
+                # 2. The ratio of body compression to dictionary expansion is unfavorable
+                if improvement < self.min_improvement_ratio:
                     break
+                if efficiency < self.min_efficiency_ratio and dict_growth > 0:
+                    # Not efficient enough - dictionary is growing faster than body is shrinking
+                    break
+            
             prev_length = new_length
+            prev_dict_size = new_dict_size
             
             if not config.hierarchical_enabled:
                 break

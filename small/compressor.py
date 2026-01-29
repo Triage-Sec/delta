@@ -20,6 +20,7 @@ from .static_dicts import (
     static_dictionary_marker,
 )
 from .types import CompressionResult, Token, TokenSeq
+from .quality_predictor import create_predictor
 from .utils import (
     is_meta_token,
     parse_length_token,
@@ -119,6 +120,63 @@ def _compress_internal(
     else:
         serialized_tokens = serialized.tokens
         dictionary_tokens = serialized.dictionary_tokens
+
+    # Build initial result for quality prediction
+    initial_result = CompressionResult(
+        original_tokens=tuple(tokens),
+        compressed_tokens=list(body_tokens),
+        serialized_tokens=serialized_tokens,
+        dictionary_tokens=dictionary_tokens,
+        body_tokens=body_tokens,
+        dictionary_map=dictionary_map,
+        meta_tokens_used=tuple(dictionary_map.keys()),
+        original_length=len(tokens),
+        compressed_length=len(serialized_tokens),
+        static_dictionary_id=static_id,
+        dictionary=dictionary,
+    )
+
+    # Quality prediction validation pass
+    if cfg.enable_quality_prediction and dictionary_map:
+        predictor = create_predictor(cfg.quality_task_type)
+        if cfg.quality_conservative:
+            predictor = create_predictor(cfg.quality_task_type)
+            predictor = type(predictor)(
+                model_path=predictor.model_path,
+                task_type=predictor.task_type,
+                conservative=True,
+            )
+        
+        prediction = predictor.predict(tokens, initial_result)
+        
+        if prediction.predicted_degradation > cfg.max_predicted_degradation:
+            # Quality risk too high - try with conservative settings or return original
+            if prediction.recommendation == "partial" and len(dictionary_map) > 0:
+                # Retry with more conservative settings (shorter max_subsequence_length)
+                conservative_cfg = CompressionConfig(
+                    **{
+                        **cfg.__dict__,
+                        "max_subsequence_length": min(4, cfg.max_subsequence_length),
+                        "hierarchical_enabled": False,
+                        "enable_quality_prediction": False,  # Don't recurse
+                    }
+                )
+                return _compress_internal(tokens, conservative_cfg, preferred_candidates)
+            elif prediction.recommendation == "skip":
+                # Return original tokens (no compression)
+                return CompressionResult(
+                    original_tokens=tuple(tokens),
+                    compressed_tokens=list(tokens),
+                    serialized_tokens=list(tokens),
+                    dictionary_tokens=[],
+                    body_tokens=list(tokens),
+                    dictionary_map={},
+                    meta_tokens_used=(),
+                    original_length=len(tokens),
+                    compressed_length=len(tokens),
+                    static_dictionary_id=None,
+                    dictionary=CompressionDictionary(meta_to_seq={}, seq_to_meta={}, max_entries=cfg.meta_token_pool_size),
+                )
 
     result = CompressionResult(
         original_tokens=tuple(tokens),

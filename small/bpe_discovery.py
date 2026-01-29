@@ -76,6 +76,9 @@ def discover_bpe_candidates(
     This approach finds one best merge at a time, simulates the merge,
     then looks for the next best merge. Returns all discovered candidates.
     
+    Uses proper index tracking through merge history to map positions
+    back to the original sequence correctly.
+    
     Args:
         tokens: Input token sequence
         config: Compression configuration
@@ -92,8 +95,10 @@ def discover_bpe_candidates(
     working = list(tokens)
     iteration = 0
     
-    # Track merges to reconstruct original positions
-    merge_history: list[tuple[tuple[Token, Token], str]] = []
+    # Track original indices for each position in the working sequence
+    # Each element is a tuple of original indices that this position represents
+    # Initially, each position maps to itself
+    original_indices: list[tuple[int, ...]] = [(i,) for i in range(len(tokens))]
     
     while iteration < max_iterations and len(working) > 1:
         # Count all adjacent pairs
@@ -125,11 +130,9 @@ def discover_bpe_candidates(
         if best_pair is None or best_savings <= 0:
             break
         
-        # Create candidate with positions in original token space
-        # For the first iteration, positions are direct. For subsequent iterations,
-        # we need to map back through merge history.
-        original_positions = _map_positions_to_original(
-            best_positions, merge_history, tokens
+        # Map positions back to original sequence using tracked indices
+        original_positions = _map_positions_with_index_tracking(
+            best_positions, original_indices, tokens
         )
         
         if original_positions:
@@ -140,9 +143,10 @@ def discover_bpe_candidates(
                 priority=1,  # BPE candidates get slight priority bonus
             ))
         
-        # Apply merge to working sequence for next iteration
+        # Apply merge to working sequence and update index tracking
         placeholder = f"__BPE_{iteration}__"
         new_working: list[Token] = []
+        new_indices: list[tuple[int, ...]] = []
         skip_next = False
         
         for i, token in enumerate(working):
@@ -151,15 +155,52 @@ def discover_bpe_candidates(
                 continue
             if i < len(working) - 1 and (working[i], working[i + 1]) == best_pair:
                 new_working.append(placeholder)
+                # Merge the original indices from both positions
+                merged_indices = original_indices[i] + original_indices[i + 1]
+                new_indices.append(merged_indices)
                 skip_next = True
             else:
                 new_working.append(token)
+                new_indices.append(original_indices[i])
         
-        merge_history.append((best_pair, placeholder))
         working = new_working
+        original_indices = new_indices
         iteration += 1
     
     return candidates
+
+
+def _map_positions_with_index_tracking(
+    positions: list[int],
+    original_indices: list[tuple[int, ...]],
+    original_tokens: TokenSeq,
+) -> list[int]:
+    """Map positions from merged sequence back to original using index tracking.
+    
+    Args:
+        positions: Positions in the current (merged) working sequence
+        original_indices: For each position in working sequence, tuple of original indices
+        original_tokens: The original token sequence
+        
+    Returns:
+        List of positions in the original sequence where the pattern starts
+    """
+    result: list[int] = []
+    
+    for pos in positions:
+        if pos >= len(original_indices) or pos + 1 >= len(original_indices):
+            continue
+        
+        # Get the first original index from the first merged position
+        # This is where the pattern starts in the original sequence
+        start_indices = original_indices[pos]
+        if start_indices:
+            original_start = start_indices[0]
+            # Validate the position is within bounds
+            if original_start < len(original_tokens) - 1:
+                result.append(original_start)
+    
+    return result
 
 
 def _map_positions_to_original(
@@ -167,28 +208,15 @@ def _map_positions_to_original(
     merge_history: list[tuple[tuple[Token, Token], str]],
     original_tokens: TokenSeq,
 ) -> list[int]:
-    """Map positions from merged sequence back to original token positions.
+    """Legacy function for backward compatibility.
     
-    For the first merge (empty history), positions are direct.
-    For subsequent merges, we need to account for previous merges.
+    Note: The new implementation uses _map_positions_with_index_tracking
+    which provides correct position mapping through merges.
     """
     if not merge_history:
         return positions
     
-    # For simplicity in this implementation, we re-scan the original to find
-    # matching positions. A production implementation would maintain a proper
-    # position mapping through the merge history.
-    
-    # Get the pair we're looking for
-    # This is a simplified approach - positions from later merges may not
-    # directly map back to original positions. For now, we return positions
-    # that are still valid in the original sequence.
-    
-    # Since we're working with a simulated merge, the positions in `positions`
-    # refer to the working (merged) sequence. We need to expand them back.
-    
-    # For a robust implementation, track original indices through merges.
-    # For now, return positions that are valid (they may be approximate).
+    # For backward compatibility, filter to valid positions
     return [p for p in positions if p < len(original_tokens) - 1]
 
 

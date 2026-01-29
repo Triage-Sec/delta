@@ -36,18 +36,21 @@ def _min_count_for_compressibility(length: int, extra_cost: int) -> int:
 def select_occurrences_ilp(
     candidates: Iterable[Candidate],
     config: CompressionConfig,
-    time_limit_seconds: float = 1.0,
+    time_limit_seconds: float | None = None,
 ) -> list[Occurrence]:
     """Select occurrences using Integer Linear Programming for optimal compression.
     
     Args:
         candidates: Iterable of candidate patterns
         config: Compression configuration
-        time_limit_seconds: Maximum time for solver (default 1 second)
+        time_limit_seconds: Maximum time for solver (uses config.ilp_time_limit if None)
         
     Returns:
         List of selected Occurrence objects
     """
+    if time_limit_seconds is None:
+        time_limit_seconds = config.ilp_time_limit
+    
     try:
         import numpy as np
         from scipy.optimize import milp, LinearConstraint, Bounds
@@ -82,11 +85,15 @@ def select_occurrences_ilp(
     n_patterns = len(patterns)
     pattern_idx = {p: i for i, p in enumerate(patterns)}
     
-    # For small problems, use exact ILP
-    # For large problems, fall back to heuristic
-    if n_occs > 2000:
-        from .selection import _beam_search_with_savings
-        return _beam_search_with_savings(occurrences, config.beam_width, config)
+    # For large problems, use configurable fallback
+    fallback_threshold = config.ilp_fallback_threshold
+    if n_occs > fallback_threshold:
+        # Use LP relaxation if enabled, otherwise beam search
+        if config.ilp_use_relaxation:
+            return select_occurrences_ilp_relaxed(candidates_list, config)
+        else:
+            from .selection import _beam_search_with_savings
+            return _beam_search_with_savings(occurrences, config.beam_width, config)
     
     extra_cost = 1 if config.dict_length_enabled else 0
     

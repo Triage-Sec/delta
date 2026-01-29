@@ -1,0 +1,28 @@
+{
+  "id": "typescript-v1",
+  "version": "1.0.0",
+  "name": "TypeScript Code Dictionary",
+  "description": "Pre-built patterns for TypeScript source code compression",
+  "entries": [
+    {"metaToken": 4294934528, "pattern": [736, 512]},
+    {"metaToken": 4294934529, "pattern": [1034, 512]},
+    {"metaToken": 4294934530, "pattern": [738, 512]},
+    {"metaToken": 4294934531, "pattern": [471, 6927]},
+    {"metaToken": 4294934532, "pattern": [220, 220]},
+    {"metaToken": 4294934533, "pattern": [220, 220, 220, 220]},
+    {"metaToken": 4294934534, "pattern": [198, 198]},
+    {"metaToken": 4294934535, "pattern": [512, 25]},
+    {"metaToken": 4294934536, "pattern": [512, 11, 659]},
+    {"metaToken": 4294934537, "pattern": [368, 659]},
+    {"metaToken": 4294934538, "pattern": [4288, 568, 512]},
+    {"metaToken": 4294934539, "pattern": [512, 304]},
+    {"metaToken": 4294934540, "pattern": [610, 25]},
+    {"metaToken": 4294934541, "pattern": [422, 659]},
+    {"metaToken": 4294934542, "pattern": [61, 2511, 25]},
+    {"metaToken": 4294934543, "pattern": [61, 1808, 25]},
+    {"metaToken": 4294934544, "pattern": [6706, 25]},
+    {"metaToken": 4294934545, "pattern": [961, 512]},
+    {"metaToken": 4294934546, "pattern": [1374, 659]},
+    {"metaToken": 4294934547, "pattern": [4288, 2073, 610]}
+  ]
+}

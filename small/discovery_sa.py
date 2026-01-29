@@ -6,6 +6,11 @@ from collections import defaultdict
 
 from .config import CompressionConfig
 from .suffix_array import build_suffix_array, lcp_intervals
+from .suffix_array_fast import (
+    build_suffix_array_fast,
+    lcp_intervals_fast,
+    should_use_fast_suffix_array,
+)
 from .types import Candidate, TokenSeq
 from .utils import is_compressible
 
@@ -38,15 +43,27 @@ def discover_candidates_sa(tokens: TokenSeq, config: CompressionConfig) -> list[
     Optimization: Instead of iterating through ALL lengths within each LCP interval,
     we work from longest to shortest and break early when we find a compressible length.
     This avoids generating massive candidate lists for highly repetitive input.
+    
+    Automatically uses numpy-accelerated suffix array for inputs > 1000 tokens.
     """
     min_len = config.min_subsequence_length
     max_len = config.max_subsequence_length
     if max_len < min_len:
         return []
     
-    sa = build_suffix_array(tokens)
-    extra_cost = 1 if config.dict_length_enabled else 0
     n = len(tokens)
+    extra_cost = 1 if config.dict_length_enabled else 0
+    
+    # Auto-select fast implementation for large inputs
+    if should_use_fast_suffix_array(n):
+        sa_fast = build_suffix_array_fast(tokens)
+        # Convert numpy arrays to lists for uniform interface
+        suffix_array = list(sa_fast.suffix_array)
+        intervals = lcp_intervals_fast(sa_fast, min_len)
+    else:
+        sa = build_suffix_array(tokens)
+        suffix_array = sa.suffix_array
+        intervals = lcp_intervals(sa, min_len)
 
     # Track which patterns we've already found to avoid duplicates
     # Key insight: if we found "abcd" compressible, we may still want "ab" if it has
@@ -54,10 +71,8 @@ def discover_candidates_sa(tokens: TokenSeq, config: CompressionConfig) -> list[
     seen_subseqs: set[tuple] = set()
     candidates: list[Candidate] = []
     
-    intervals = lcp_intervals(sa, min_len)
-    
     for start, end, lcp_len in intervals:
-        positions = sorted(sa.suffix_array[idx] for idx in range(start, end + 1))
+        positions = sorted(suffix_array[idx] for idx in range(start, end + 1))
         length_limit = min(lcp_len, max_len)
         
         # Work from longest to shortest, finding maximal compressible lengths
@@ -99,7 +114,7 @@ def discover_candidates_sa(tokens: TokenSeq, config: CompressionConfig) -> list[
     positions_by_subseq: dict[tuple, set[int]] = defaultdict(set)
     
     for start, end, lcp_len in intervals:
-        positions = sorted(sa.suffix_array[idx] for idx in range(start, end + 1))
+        positions = sorted(suffix_array[idx] for idx in range(start, end + 1))
         length_limit = min(lcp_len, max_len)
         
         for length in range(min_len, length_limit + 1):

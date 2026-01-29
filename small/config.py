@@ -34,6 +34,8 @@ class CompressionConfig:
     selection_mode: str = "greedy"
     beam_width: int = 8
     ilp_time_limit: float = 1.0  # Timeout for ILP solver
+    ilp_fallback_threshold: int = 2000  # Fallback to LP relaxation above this many occurrences
+    ilp_use_relaxation: bool = True  # Use LP relaxation for larger inputs instead of beam search
     
     # AST-aware compression (Python)
     ast_enabled: bool = True

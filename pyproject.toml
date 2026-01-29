@@ -6,7 +6,10 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
-  { name = "Triage-Sec" }
+  { name = "Triage Sec", email = "nicks@triage-sec.com" },
+  { name = "Nikhil Srivastava" },
+  { name = "Omansh Bainsla" },
+  { name = "Sahil Chatiwala" }
 ]
 keywords = ["llm", "compression", "tokens", "context", "inference", "transformers"]
 classifiers = [

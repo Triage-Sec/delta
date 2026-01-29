@@ -1,0 +1,28 @@
+{
+  "id": "markdown-v1",
+  "version": "1.0.0",
+  "name": "Markdown Documentation Dictionary",
+  "description": "Pre-built patterns for Markdown documentation compression",
+  "entries": [
+    {"metaToken": 4294934528, "pattern": [198, 198]},
+    {"metaToken": 4294934529, "pattern": [14196, 198]},
+    {"metaToken": 4294934530, "pattern": [532, 279]},
+    {"metaToken": 4294934531, "pattern": [6102, 220]},
+    {"metaToken": 4294934532, "pattern": [279, 279]},
+    {"metaToken": 4294934533, "pattern": [61, 220]},
+    {"metaToken": 4294934534, "pattern": [2, 4211]},
+    {"metaToken": 4294934535, "pattern": [7191, 74694]},
+    {"metaToken": 4294934536, "pattern": [27, 198]},
+    {"metaToken": 4294934537, "pattern": [532, 3384]},
+    {"metaToken": 4294934538, "pattern": [2, 198]},
+    {"metaToken": 4294934539, "pattern": [7, 2]},
+    {"metaToken": 4294934540, "pattern": [8, 610]},
+    {"metaToken": 4294934541, "pattern": [220, 220]},
+    {"metaToken": 4294934542, "pattern": [14, 532]},
+    {"metaToken": 4294934543, "pattern": [5765, 5765, 5765]},
+    {"metaToken": 4294934544, "pattern": [2, 1374]},
+    {"metaToken": 4294934545, "pattern": [220, 220, 220, 220]},
+    {"metaToken": 4294934546, "pattern": [1374, 659]},
+    {"metaToken": 4294934547, "pattern": [198, 14196]}
+  ]
+}
