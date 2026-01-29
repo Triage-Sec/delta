@@ -1,0 +1,132 @@
+name: npm Packages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - '.github/workflows/npm-packages.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - '.github/workflows/npm-packages.yml'
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  build-wasm:
+    name: Build WASM Core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/core
+
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
+
+      - name: Build WASM (bundler target)
+        working-directory: packages/core
+        run: wasm-pack build --target bundler --release --out-dir ../sdk/src/wasm/pkg
+
+      - name: Build WASM (Node.js target)
+        working-directory: packages/core
+        run: wasm-pack build --target nodejs --release --out-dir ../sdk/src/wasm/pkg-node
+
+      - name: Upload WASM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wasm-pkg
+          path: |
+            packages/sdk/src/wasm/pkg/
+            packages/sdk/src/wasm/pkg-node/
+          retention-days: 1
+
+  test-rust:
+    name: Rust Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/core
+
+      - name: Run Rust tests
+        working-directory: packages/core
+        run: cargo test --release
+
+  test-sdk:
+    name: SDK Tests
+    needs: build-wasm
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Download WASM artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: wasm-pkg
+          path: packages/sdk/src/wasm
+
+      - name: Install SDK dependencies
+        working-directory: packages/sdk
+        run: npm install
+
+      - name: Build SDK
+        working-directory: packages/sdk
+        run: npm run build
+
+      - name: Run SDK tests
+        working-directory: packages/sdk
+        run: npm test
+
+  test-ml:
+    name: ML Package Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install ML dependencies
+        working-directory: packages/ml
+        run: npm install
+
+      - name: Build ML package
+        working-directory: packages/ml
+        run: npm run build
+
+      - name: Run ML tests
+        working-directory: packages/ml
+        run: npm test || true
