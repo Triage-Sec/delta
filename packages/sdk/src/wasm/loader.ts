@@ -1,26 +1,11 @@
 /**
- * WASM module loader with cross-platform support.
+ * WASM module loader - wraps wasm-pack generated web target output.
  *
- * Handles loading the WebAssembly module in browser, Node.js, and Deno environments.
+ * This loader uses the wasm-bindgen generated init() function which properly
+ * handles WASM loading across browser and Node.js environments.
  */
 
-// Deno global type declaration
-declare const Deno: { version: { deno: string } } | undefined;
-
-// Type definitions for the WASM exports
-export interface WasmExports {
-  memory: WebAssembly.Memory;
-  compress: (tokens: Uint32Array, config: unknown) => CompressionResultWasm;
-  decompress: (tokens: Uint32Array, config: unknown) => Uint32Array;
-  discover_patterns: (
-    tokens: Uint32Array,
-    minLength: number,
-    maxLength: number
-  ) => unknown;
-  version: () => string;
-  StreamingCompressor: new (config: unknown) => StreamingCompressorWasm;
-}
-
+// Re-export types - these match the wasm-bindgen generated classes
 export interface CompressionResultWasm {
   compression_ratio: number;
   tokens_saved: number;
@@ -31,29 +16,37 @@ export interface CompressionResultWasm {
   getBodyTokens: () => Uint32Array;
   getOriginalTokens: () => Uint32Array;
   getStaticDictionaryId: () => string | null;
+  free: () => void;
 }
 
 export interface StreamingCompressorWasm {
   add_chunk: (tokens: Uint32Array) => void;
   finish: () => CompressionResultWasm;
   memory_usage: () => number;
+  free: () => void;
 }
 
-// Global state
-let wasmModule: WebAssembly.Module | null = null;
-let wasmInstance: WasmExports | null = null;
+// Placeholder types until WASM is loaded
+export interface WasmExports {
+  compress: (tokens: Uint32Array, config?: unknown) => CompressionResultWasm;
+  decompress: (tokens: Uint32Array) => Uint32Array;
+  discover_patterns: (
+    tokens: Uint32Array,
+    minLength: number,
+    maxLength: number
+  ) => unknown;
+  version: () => string;
+}
+
+// Track initialization state
+let initialized = false;
 let initPromise: Promise<void> | null = null;
+let wasmExports: WasmExports | null = null;
 
 /**
  * Detect the current runtime environment.
  */
-function detectEnvironment(): 'browser' | 'node' | 'deno' {
-  if (typeof Deno !== 'undefined') {
-    return 'deno';
-  }
-  if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
-    return 'browser';
-  }
+function detectEnvironment(): 'browser' | 'node' {
   if (
     typeof process !== 'undefined' &&
     process.versions &&
@@ -61,73 +54,7 @@ function detectEnvironment(): 'browser' | 'node' | 'deno' {
   ) {
     return 'node';
   }
-  return 'browser'; // Default fallback
-}
-
-/**
- * Load WASM bytes based on environment.
- */
-async function loadWasmBytes(): Promise<ArrayBuffer> {
-  const env = detectEnvironment();
-
-  // Get the path to the WASM file
-  // This will be populated during the build process
-  const wasmPath = new URL('./small_ltsc_core_bg.wasm', import.meta.url);
-
-  switch (env) {
-    case 'browser': {
-      const response = await fetch(wasmPath);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch WASM: ${response.statusText}`);
-      }
-      return response.arrayBuffer();
-    }
-
-    case 'node': {
-      // Dynamic import for Node.js fs module
-      const { readFile } = await import('node:fs/promises');
-      const { fileURLToPath } = await import('node:url');
-      const path = fileURLToPath(wasmPath);
-      const buffer = await readFile(path);
-      return buffer.buffer.slice(
-        buffer.byteOffset,
-        buffer.byteOffset + buffer.byteLength
-      );
-    }
-
-    case 'deno': {
-      // Deno can use fetch for local files
-      const response = await fetch(wasmPath);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch WASM: ${response.statusText}`);
-      }
-      return response.arrayBuffer();
-    }
-
-    default:
-      throw new Error(`Unsupported environment: ${env}`);
-  }
-}
-
-/**
- * Create import object for WASM instantiation.
- */
-function createImports(): WebAssembly.Imports {
-  return {
-    env: {
-      // Logging functions for debugging
-      console_log: (ptr: number, len: number) => {
-        // In production, this would decode the string from memory
-        console.log('[WASM]', ptr, len);
-      },
-    },
-    wbg: {
-      // wasm-bindgen imports will be added here during build
-      __wbindgen_throw: (ptr: number, len: number) => {
-        throw new Error(`WASM error at ${ptr} len ${len}`);
-      },
-    },
-  };
+  return 'browser';
 }
 
 /**
@@ -139,23 +66,46 @@ function createImports(): WebAssembly.Imports {
  * @throws Error if WASM loading fails
  */
 export async function initWasm(): Promise<void> {
-  if (wasmInstance) {
-    return; // Already initialized
+  if (initialized) {
+    return;
   }
 
   if (initPromise) {
-    return initPromise; // Initialization in progress
+    return initPromise;
   }
 
   initPromise = (async () => {
     try {
-      const wasmBytes = await loadWasmBytes();
-      wasmModule = await WebAssembly.compile(wasmBytes);
-      const imports = createImports();
-      const instance = await WebAssembly.instantiate(wasmModule, imports);
-      wasmInstance = instance.exports as unknown as WasmExports;
+      const env = detectEnvironment();
+      
+      // Dynamically import the wasm-pack generated module
+      // This uses the web target which has a proper init() function
+      const wasmModule = await import('./pkg/small_ltsc_core.js');
+      
+      if (env === 'node') {
+        // In Node.js, we need to provide the WASM file path/bytes
+        const { readFile } = await import('node:fs/promises');
+        const { fileURLToPath } = await import('node:url');
+        const wasmPath = new URL('./pkg/small_ltsc_core_bg.wasm', import.meta.url);
+        const path = fileURLToPath(wasmPath);
+        const buffer = await readFile(path);
+        await wasmModule.default(buffer);
+      } else {
+        // In browser, wasm-pack's init() handles loading via import.meta.url
+        await wasmModule.default();
+      }
+      
+      // Store exports for getWasm()
+      wasmExports = {
+        compress: wasmModule.compress,
+        decompress: wasmModule.decompress,
+        discover_patterns: wasmModule.discover_patterns,
+        version: wasmModule.version,
+      };
+      
+      initialized = true;
     } catch (error) {
-      initPromise = null; // Allow retry on failure
+      initPromise = null;
       throw error;
     }
   })();
@@ -164,23 +114,28 @@ export async function initWasm(): Promise<void> {
 }
 
 /**
- * Initialize from pre-compiled WASM module.
+ * Initialize from pre-compiled WASM module or Response.
  *
- * Useful for environments where the WASM is bundled differently.
- *
- * @param module - Pre-compiled WebAssembly.Module
+ * @param module - Pre-compiled WebAssembly.Module, Response, or bytes
  */
 export async function initWasmFromModule(
-  module: WebAssembly.Module
+  module: WebAssembly.Module | Response | Promise<Response> | BufferSource
 ): Promise<void> {
-  if (wasmInstance) {
+  if (initialized) {
     return;
   }
 
-  wasmModule = module;
-  const imports = createImports();
-  const instance = await WebAssembly.instantiate(module, imports);
-  wasmInstance = instance.exports as unknown as WasmExports;
+  const wasmModule = await import('./pkg/small_ltsc_core.js');
+  await wasmModule.default(module);
+  
+  wasmExports = {
+    compress: wasmModule.compress,
+    decompress: wasmModule.decompress,
+    discover_patterns: wasmModule.discover_patterns,
+    version: wasmModule.version,
+  };
+  
+  initialized = true;
 }
 
 /**
@@ -191,17 +146,7 @@ export async function initWasmFromModule(
 export async function initWasmFromBytes(
   bytes: ArrayBuffer | Uint8Array
 ): Promise<void> {
-  if (wasmInstance) {
-    return;
-  }
-
-  const buffer = bytes instanceof Uint8Array
-    ? new Uint8Array(bytes).buffer
-    : bytes;
-  wasmModule = await WebAssembly.compile(buffer as ArrayBuffer);
-  const imports = createImports();
-  const instance = await WebAssembly.instantiate(wasmModule, imports);
-  wasmInstance = instance.exports as unknown as WasmExports;
+  return initWasmFromModule(bytes);
 }
 
 /**
@@ -210,28 +155,28 @@ export async function initWasmFromBytes(
  * @throws Error if WASM is not initialized
  */
 export function getWasm(): WasmExports {
-  if (!wasmInstance) {
+  if (!initialized || !wasmExports) {
     throw new Error(
       'WASM not initialized. Call initWasm() first and await its completion.'
     );
   }
-  return wasmInstance;
+  return wasmExports;
 }
 
 /**
  * Check if WASM is initialized.
  */
 export function isWasmInitialized(): boolean {
-  return wasmInstance !== null;
+  return initialized;
 }
 
 /**
  * Reset the WASM instance (mainly for testing).
  */
 export function resetWasm(): void {
-  wasmInstance = null;
-  wasmModule = null;
+  initialized = false;
   initPromise = null;
+  wasmExports = null;
 }
 
 /**
@@ -241,5 +186,3 @@ export function getWasmVersion(): string {
   const wasm = getWasm();
   return wasm.version();
 }
-
-// Types are already exported at their interface declarations above
