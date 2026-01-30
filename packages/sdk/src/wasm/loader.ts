@@ -80,8 +80,8 @@ export async function initWasm(): Promise<void> {
       const env = detectEnvironment();
       
       // Dynamically import the wasm-pack generated module
-      // Types are provided by pkg.d.ts stub
-      const wasmModule = await import('./pkg/small_ltsc_core.js');
+      const { importWasmModule } = await import('./import-helper.js');
+      const wasmModule = await importWasmModule();
       
       if (env === 'node') {
         // In Node.js, we need to provide the WASM file path/bytes
@@ -127,8 +127,9 @@ export async function initWasmFromModule(
     return;
   }
 
-  // Types are provided by pkg.d.ts stub
-  const wasmModule = await import('./pkg/small_ltsc_core.js');
+  // Dynamically import the wasm-pack generated module
+  const { importWasmModule } = await import('./import-helper.js');
+  const wasmModule = await importWasmModule();
   await wasmModule.default(module);
   
   wasmExports = {
