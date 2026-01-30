@@ -1,6 +1,6 @@
 [project]
 name = "small-ltsc"
-version = "0.2.3"
+version = "0.2.4"
 description = "Lossless token sequence compression for large language models"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -50,21 +50,21 @@ embeddings = [
   "redis>=5.0.0",
 ]
 analysis = [
-  "small[embeddings]",
+  "small-ltsc[embeddings]",
   "scikit-learn>=1.3.0",
   "scipy>=1.11.0",
   "matplotlib>=3.7.0",
   "pandas>=2.0.0",
 ]
 training = [
-  "small[tokenizers]",
+  "small-ltsc[tokenizers]",
   "datasets>=2.14.0",
   "accelerate>=0.24.0",
   "peft>=0.6.0",
   "wandb>=0.15.0",
 ]
 dev = [
-  "small[analysis,training]",
+  "small-ltsc[analysis,training]",
   "pytest>=7.4",
   "pytest-cov>=4.1.0",
   "pytest-benchmark>=4.0.0",
@@ -73,7 +73,7 @@ dev = [
   "ruff>=0.1.0",
   "pre-commit>=3.5.0",
 ]
-all = ["small[tokenizers,embeddings,analysis,training]"]
+all = ["small-ltsc[tokenizers,embeddings,analysis,training]"]
 
 [tool.setuptools.packages.find]
 include = ["small*"]
