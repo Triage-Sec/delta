@@ -74,6 +74,12 @@ dev = [
   "pre-commit>=3.5.0",
 ]
 all = ["small-ltsc[tokenizers,embeddings,analysis,training]"]
+mcp = [
+  "mcp>=1.0.0",
+]
+
+[project.scripts]
+small-mcp = "small.mcp:run_server"
 
 [tool.setuptools.packages.find]
 include = ["small*"]

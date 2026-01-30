@@ -217,6 +217,32 @@ if prediction.recommendation == "compress":
     pass
 ```
 
+### MCP Integration (AI Assistants)
+
+Small provides an MCP server for integration with AI coding assistants:
+
+```bash
+# Install with MCP support
+pip install "small-ltsc[mcp]"
+
+# Run the server
+small-mcp
+```
+
+Configure in Cursor/Claude Desktop (`~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "small-ltsc": {
+      "command": "small-mcp"
+    }
+  }
+}
+```
+
+See [MCP Documentation](docs/mcp.md) for full setup guide and available tools.
+
 ## Architecture
 
 ```
@@ -297,6 +323,7 @@ cargo test                          # Unit tests
 - [ML Integration](docs/ML_INTEGRATION.md) - Importance scoring and quality prediction
 - [API Reference](docs/API.md) - Complete API documentation
 - [TypeScript SDK Guide](packages/sdk/docs/QUICKSTART.md) - Getting started with the SDK
+- [MCP Server](docs/mcp.md) - Integration with AI coding assistants
 
 ## Citation
 
