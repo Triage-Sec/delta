@@ -252,13 +252,11 @@ def select_occurrences_semantic(
 
     # Pre-filter patterns that can never be compressible
     subseq_to_occs: dict[tuple, list[int]] = {}
-    all_positions: list[tuple[int, ...]] = []
 
     for cand in candidates_list:
         subseq_to_occs.setdefault(cand.subsequence, [])
         for pos in cand.positions:
-            subseq_to_occs[cand.subsequence].append(len(all_positions))
-            all_positions.append((pos, cand.length, cand.subsequence, cand.priority))
+            subseq_to_occs[cand.subsequence].append(pos)
 
     viable_subseqs: set[tuple] = set()
     for subseq, pos_indices in subseq_to_occs.items():

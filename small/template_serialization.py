@@ -244,7 +244,8 @@ def compute_template_body_length(
         Total tokens in body for all instances
     """
     total = 0
-    slot_count = template.slot_count if hasattr(template, 'slot_count') else len(template.slot_positions)
+    # Both Template and TemplateCandidate have slot_count (attr or property)
+    slot_count: int = template.slot_count
     
     for instance in template.instances:
         # Meta-token reference

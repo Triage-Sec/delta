@@ -21,7 +21,6 @@ from __future__ import annotations
 
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Sequence
 
 from .config import CompressionConfig
 from .template_types import (
@@ -244,7 +243,6 @@ def _extract_template_from_group(
     Aligns sequences to find conserved (fixed) and variable (slot) positions.
     """
     sequences = [seq for _, seq in group.sequences]
-    positions = [pos for pos, _ in group.sequences]
     
     if len(sequences) < 2:
         return None

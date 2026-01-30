@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Iterator, Sequence
+from typing import TYPE_CHECKING, Any, Iterator, Sequence, cast
 
 from .compressor import compress
 from .config import CompressionConfig
@@ -108,7 +108,7 @@ class StreamingResult:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
-        result = {
+        result: dict[str, Any] = {
             "chunk_index": self.chunk_index,
             "original_length": self.original_length,
             "compressed_length": self.compressed_length,
@@ -442,16 +442,17 @@ def decompress_streaming(
     for i, chunk in enumerate(chunks):
         # Handle both raw token sequences and StreamingResult objects
         if isinstance(chunk, StreamingResult):
-            tokens = chunk.compressed_tokens
+            chunk_tokens: list[Token] = chunk.compressed_tokens
             overlap = chunk._overlap_tokens_at_start
         else:
-            tokens = list(chunk)
+            # chunk is Sequence[Token]
+            chunk_tokens = list(cast(Sequence[Token], chunk))
             overlap = 0
 
-        if not tokens:
+        if not chunk_tokens:
             continue
 
-        decompressed = decompress(tokens, config)
+        decompressed = decompress(chunk_tokens, config)
 
         # Skip overlap tokens from previous chunk (except for first chunk)
         if i > 0 and overlap > 0:

@@ -16,7 +16,7 @@ import time
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import Callable, Deque, Optional
+from typing import Any, Callable, Deque, Optional
 
 from .types import CompressionResult
 
@@ -234,7 +234,7 @@ class QualityMonitor:
         self._records: Deque[QualityRecord] = deque(maxlen=self.config.window_size)
         self._lock = threading.RLock()
         self._baselines: dict[str, QualityBaseline] = {}
-        self._alert_manager: Optional["AlertManager"] = None
+        self._alert_manager: Optional[Any] = None  # AlertManager (imported lazily)
         self._on_record_callbacks: list[Callable[[QualityRecord], None]] = []
     
     def record(
@@ -388,7 +388,7 @@ class QualityMonitor:
         Returns:
             HealthStatus with alerts if thresholds exceeded
         """
-        from .quality_alerts import AlertManager, check_thresholds
+        from .quality_alerts import check_thresholds
         
         summary = self.get_summary()
         alerts = []
