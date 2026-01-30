@@ -41,12 +41,16 @@ class PatternEntry:
     @property
     def avg_occurrences(self) -> float:
         """Average occurrences per compression operation."""
-        return self.total_occurrences / self.operation_count if self.operation_count else 0
+        return (
+            self.total_occurrences / self.operation_count if self.operation_count else 0
+        )
 
     @property
     def avg_savings(self) -> float:
         """Average tokens saved per occurrence."""
-        return self.total_savings / self.total_occurrences if self.total_occurrences else 0
+        return (
+            self.total_savings / self.total_occurrences if self.total_occurrences else 0
+        )
 
     @property
     def length(self) -> int:
@@ -96,7 +100,9 @@ class BloomFilter:
         # Calculate optimal size and hash count
         # m = -n*ln(p) / (ln(2)^2)
         # k = (m/n) * ln(2)
-        self.size = max(64, int(-expected_items * math.log(fp_rate) / (math.log(2) ** 2)))
+        self.size = max(
+            64, int(-expected_items * math.log(fp_rate) / (math.log(2) ** 2))
+        )
         self.hash_count = max(1, int((self.size / expected_items) * math.log(2)))
         self.bits = bytearray((self.size + 7) // 8)
         self._count = 0
@@ -191,7 +197,9 @@ class PatternCache:
             self._operation_counter += 1
 
             for meta_token, tokens in dictionary_map.items():
-                if not (self.min_pattern_length <= len(tokens) <= self.max_pattern_length):
+                if not (
+                    self.min_pattern_length <= len(tokens) <= self.max_pattern_length
+                ):
                     continue
 
                 token_tuple = tuple(tokens)
@@ -266,7 +274,7 @@ class PatternCache:
             token_list = list(tokens)
             n = len(token_list)
 
-            for score, entry in scored_patterns[:top_k * 2]:  # Check more than needed
+            for score, entry in scored_patterns[: top_k * 2]:  # Check more than needed
                 if len(results) >= top_k:
                     break
 
@@ -351,7 +359,9 @@ class PatternCache:
                 "cache_hits": self._hits,
                 "cache_misses": self._misses,
                 "warm_start_calls": self._warm_starts,
-                "hit_rate": self._hits / (self._hits + self._misses) if (self._hits + self._misses) > 0 else 0,
+                "hit_rate": self._hits / (self._hits + self._misses)
+                if (self._hits + self._misses) > 0
+                else 0,
             }
 
     def clear(self) -> dict[str, Any]:
@@ -400,14 +410,17 @@ class PatternCache:
             with self._lock:
                 self._operation_counter = data.get("operation_counter", 0)
                 self._patterns = {
-                    k: PatternEntry.from_dict(v) for k, v in data.get("patterns", {}).items()
+                    k: PatternEntry.from_dict(v)
+                    for k, v in data.get("patterns", {}).items()
                 }
                 # Rebuild bloom filter
                 self._bloom.clear()
                 for hash_key in self._patterns:
                     self._bloom.add(hash_key)
 
-            logger.info(f"Loaded pattern cache from {path} ({len(self._patterns)} patterns)")
+            logger.info(
+                f"Loaded pattern cache from {path} ({len(self._patterns)} patterns)"
+            )
             return True
 
         except (json.JSONDecodeError, KeyError, TypeError) as e:

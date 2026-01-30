@@ -66,13 +66,13 @@ class TemplateDiscoveryStage(DiscoveryStage):
 
     def discover(self, tokens: TokenSeq, config: CompressionConfig) -> list[Candidate]:
         """Discover template patterns.
-        
+
         Note: This is a discovery-only stage for now. It identifies parameterized
         patterns but doesn't convert them to standard Candidates because:
         1. Template frames contain slots - the actual tokens at instance positions
            include slot values that differ between instances
         2. Full template compression requires specialized serialization
-        
+
         The discovered templates are logged/tracked but actual compression
         relies on the exact pattern discovery finding the common subsequences.
         Future: Integrate full template serialization for slot-aware compression.
@@ -81,7 +81,7 @@ class TemplateDiscoveryStage(DiscoveryStage):
         # Template discovery itself runs, but we don't convert to standard
         # candidates since the positions don't map to exact matches
         _template_candidates = discover_templates(tokens, config)
-        
+
         # For now, return empty - exact discovery will find what it can
         # Full template integration would require serialization changes
         # to handle <SlotVal> markers in the body

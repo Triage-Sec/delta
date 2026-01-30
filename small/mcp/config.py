@@ -91,7 +91,9 @@ class MCPConfig:
             discovery_mode=get_env("DISCOVERY_MODE", "suffix-array"),
             selection_mode=get_env("SELECTION_MODE", "greedy"),
             enable_pattern_cache=get_env_bool("ENABLE_PATTERN_CACHE", True),
-            pattern_cache_max_patterns=get_env_int("PATTERN_CACHE_MAX_PATTERNS", 10_000),
+            pattern_cache_max_patterns=get_env_int(
+                "PATTERN_CACHE_MAX_PATTERNS", 10_000
+            ),
             pattern_cache_file=get_env("PATTERN_CACHE_FILE", "pattern_cache.json"),
             warm_start_top_k=get_env_int("WARM_START_TOP_K", 50),
         )

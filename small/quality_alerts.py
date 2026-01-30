@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 class AlertSeverity(Enum):
     """Alert severity levels."""
+
     INFO = "info"
     WARNING = "warning"
     CRITICAL = "critical"
@@ -26,7 +27,7 @@ class AlertSeverity(Enum):
 @dataclass(frozen=True)
 class QualityAlert:
     """A quality alert triggered by threshold violation.
-    
+
     Attributes:
         severity: Alert severity (info, warning, critical)
         metric: Which metric triggered the alert
@@ -36,6 +37,7 @@ class QualityAlert:
         timestamp: When the alert was generated
         context: Additional context
     """
+
     severity: AlertSeverity
     metric: str
     current_value: float
@@ -43,10 +45,10 @@ class QualityAlert:
     message: str
     timestamp: datetime
     context: dict = field(default_factory=dict)
-    
+
     def __str__(self) -> str:
         return f"[{self.severity.value.upper()}] {self.metric}: {self.message}"
-    
+
     def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""
         return {
@@ -63,7 +65,7 @@ class QualityAlert:
 @dataclass
 class AlertRule:
     """A rule for generating alerts.
-    
+
     Attributes:
         metric: Metric to check
         warning_threshold: Threshold for warning alerts
@@ -71,35 +73,41 @@ class AlertRule:
         comparison: "gt" (greater than) or "lt" (less than)
         message_template: Template for alert message
     """
+
     metric: str
     warning_threshold: float
     critical_threshold: float
     comparison: str = "gt"  # "gt" or "lt"
     message_template: str = "{metric} is {value:.3f} (threshold: {threshold:.3f})"
-    
+
     def check(self, value: float) -> QualityAlert | None:
         """Check value against thresholds.
-        
+
         Returns:
             QualityAlert if threshold exceeded, None otherwise
         """
         if self.comparison == "gt":
             if value >= self.critical_threshold:
-                return self._make_alert(AlertSeverity.CRITICAL, value, self.critical_threshold)
+                return self._make_alert(
+                    AlertSeverity.CRITICAL, value, self.critical_threshold
+                )
             if value >= self.warning_threshold:
-                return self._make_alert(AlertSeverity.WARNING, value, self.warning_threshold)
+                return self._make_alert(
+                    AlertSeverity.WARNING, value, self.warning_threshold
+                )
         else:  # lt
             if value <= self.critical_threshold:
-                return self._make_alert(AlertSeverity.CRITICAL, value, self.critical_threshold)
+                return self._make_alert(
+                    AlertSeverity.CRITICAL, value, self.critical_threshold
+                )
             if value <= self.warning_threshold:
-                return self._make_alert(AlertSeverity.WARNING, value, self.warning_threshold)
+                return self._make_alert(
+                    AlertSeverity.WARNING, value, self.warning_threshold
+                )
         return None
-    
+
     def _make_alert(
-        self, 
-        severity: AlertSeverity, 
-        value: float, 
-        threshold: float
+        self, severity: AlertSeverity, value: float, threshold: float
     ) -> QualityAlert:
         """Create an alert."""
         message = self.message_template.format(
@@ -166,21 +174,21 @@ DEFAULT_RULES = [
 
 class AlertManager:
     """Manage alert rules and dispatch alerts.
-    
+
     Handles:
     - Checking rules against summaries
     - Alert cooldowns to prevent spam
     - Callback dispatch for alert handling
-    
+
     Example:
         manager = AlertManager()
         manager.subscribe(lambda alert: print(alert))
-        
+
         alerts = manager.check(summary)
         for alert in alerts:
             logging.warning(str(alert))
     """
-    
+
     def __init__(
         self,
         rules: list[AlertRule] | None = None,
@@ -190,68 +198,68 @@ class AlertManager:
         self.cooldown_seconds = cooldown_seconds
         self._last_alert_time: dict[str, float] = {}
         self._subscribers: list[Callable[[QualityAlert], None]] = []
-    
+
     def add_rule(self, rule: AlertRule) -> None:
         """Add a custom alert rule."""
         self.rules.append(rule)
-    
+
     def remove_rule(self, metric: str) -> None:
         """Remove rules for a metric."""
         self.rules = [r for r in self.rules if r.metric != metric]
-    
+
     def subscribe(self, callback: Callable[[QualityAlert], None]) -> None:
         """Subscribe to receive alerts.
-        
+
         Args:
             callback: Function to call with each alert
         """
         self._subscribers.append(callback)
-    
+
     def unsubscribe(self, callback: Callable[[QualityAlert], None]) -> None:
         """Unsubscribe from alerts."""
         self._subscribers = [s for s in self._subscribers if s != callback]
-    
+
     def check(self, summary: "QualitySummary") -> list[QualityAlert]:
         """Check all rules against a summary.
-        
+
         Args:
             summary: Quality summary to check
-            
+
         Returns:
             List of triggered alerts (respecting cooldowns)
         """
         alerts: list[QualityAlert] = []
         now = time.time()
-        
+
         for rule in self.rules:
             # Get value from summary
             value = getattr(summary, rule.metric, None)
             if value is None:
                 continue
-            
+
             # Check rule
             alert = rule.check(value)
             if alert is None:
                 continue
-            
+
             # Check cooldown
             last_time = self._last_alert_time.get(rule.metric, 0)
             if now - last_time < self.cooldown_seconds:
                 continue
-            
+
             # Record and dispatch
             self._last_alert_time[rule.metric] = now
             alerts.append(alert)
-            
+
             # Dispatch to subscribers
             for subscriber in self._subscribers:
                 try:
                     subscriber(alert)
                 except Exception:
                     pass  # Don't let subscriber errors break alerting
-        
+
         return alerts
-    
+
     def clear_cooldowns(self) -> None:
         """Clear all alert cooldowns."""
         self._last_alert_time.clear()
@@ -262,13 +270,13 @@ def check_thresholds(
     config: "MonitoringConfig",
 ) -> list[QualityAlert]:
     """Check summary against config thresholds.
-    
+
     Convenience function that creates rules from config and checks.
-    
+
     Args:
         summary: Quality summary to check
         config: Monitoring config with thresholds
-        
+
     Returns:
         List of triggered alerts
     """
@@ -295,7 +303,7 @@ def check_thresholds(
             message_template="Mean dictionary overhead {value:.2%} exceeds {threshold:.2%}",
         ),
     ]
-    
+
     alerts: list[QualityAlert] = []
     for rule in rules:
         value = getattr(summary, rule.metric, None)
@@ -303,27 +311,27 @@ def check_thresholds(
             alert = rule.check(value)
             if alert is not None:
                 alerts.append(alert)
-    
+
     return alerts
 
 
 def format_alerts_ascii(alerts: list[QualityAlert]) -> str:
     """Format alerts as ASCII text.
-    
+
     Args:
         alerts: List of alerts to format
-        
+
     Returns:
         ASCII formatted string
     """
     if not alerts:
         return "No alerts."
-    
+
     lines = []
     lines.append("=" * 60)
     lines.append("QUALITY ALERTS")
     lines.append("=" * 60)
-    
+
     for alert in alerts:
         severity = alert.severity.value.upper()
         lines.append(f"[{severity}] {alert.metric}")
@@ -332,5 +340,5 @@ def format_alerts_ascii(alerts: list[QualityAlert]) -> str:
         lines.append(f"  Message:   {alert.message}")
         lines.append(f"  Time:      {alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
         lines.append("-" * 60)
-    
+
     return "\n".join(lines)

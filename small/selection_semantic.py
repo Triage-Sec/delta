@@ -126,7 +126,7 @@ def _compute_semantic_weights(
         # Extract context windows for each occurrence
         contexts: list[str] = []
         # Sample positions if too many (limit embedding calls)
-        sample_positions = list(cand.positions[:min(len(cand.positions), batch_size)])
+        sample_positions = list(cand.positions[: min(len(cand.positions), batch_size)])
 
         for pos in sample_positions:
             context = _extract_context(tokens, pos, cand.length, context_window)

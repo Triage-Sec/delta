@@ -28,7 +28,9 @@ def validate_config(config: CompressionConfig) -> list[ConfigWarning]:
     if config.hierarchical_max_depth < 1:
         raise ValueError("Hierarchical max depth must be >= 1.")
     if config.selection_mode not in {"greedy", "optimal", "beam", "ilp", "semantic"}:
-        raise ValueError("Selection mode must be one of: greedy, optimal, beam, ilp, semantic.")
+        raise ValueError(
+            "Selection mode must be one of: greedy, optimal, beam, ilp, semantic."
+        )
     if config.selection_mode == "beam" and config.beam_width < 1:
         raise ValueError("Beam width must be >= 1.")
     if (

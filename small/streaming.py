@@ -129,6 +129,7 @@ def _estimate_memory_mb() -> float:
     # In production, could use tracemalloc for more accuracy
     try:
         import resource
+
         usage = resource.getrusage(resource.RUSAGE_SELF)
         return usage.ru_maxrss / (1024 * 1024)  # Convert to MB (macOS reports in bytes)
     except (ImportError, AttributeError):
@@ -181,7 +182,9 @@ class StreamingCompressor:
         self._buffer: list[Token] = []
         self._chunk_index = 0
         self._stats = StreamingStats()
-        self._global_patterns: dict[tuple[Token, ...], Token] = {}  # pattern -> meta_token
+        self._global_patterns: dict[
+            tuple[Token, ...], Token
+        ] = {}  # pattern -> meta_token
         self._next_meta_id = 0
         self._finalized = False
         self._pending_overlap = 0  # Overlap tokens carried from previous chunk
@@ -272,7 +275,9 @@ class StreamingCompressor:
             selection_mode=self.base_config.selection_mode,
             discovery_mode=self.base_config.discovery_mode,
             hierarchical_enabled=self.base_config.hierarchical_enabled,
-            hierarchical_max_depth=min(2, self.base_config.hierarchical_max_depth),  # Limit depth for streaming
+            hierarchical_max_depth=min(
+                2, self.base_config.hierarchical_max_depth
+            ),  # Limit depth for streaming
             pattern_cache=self.pattern_cache,
             warm_start_top_k=self.base_config.warm_start_top_k,
             cache_learning_enabled=self.base_config.cache_learning_enabled,
@@ -290,7 +295,9 @@ class StreamingCompressor:
         self._stats.total_output_tokens += result.compressed_length
         self._stats.total_patterns_found += len(result.dictionary_map)
         self._stats.total_time_ms += elapsed_ms
-        self._stats.peak_memory_mb = max(self._stats.peak_memory_mb, _estimate_memory_mb())
+        self._stats.peak_memory_mb = max(
+            self._stats.peak_memory_mb, _estimate_memory_mb()
+        )
 
         # Track patterns globally for potential deduplication
         for meta_token, pattern in result.dictionary_map.items():
