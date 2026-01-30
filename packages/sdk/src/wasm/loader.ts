@@ -29,13 +29,14 @@ export interface StreamingCompressorWasm {
 // Placeholder types until WASM is loaded
 export interface WasmExports {
   compress: (tokens: Uint32Array, config?: unknown) => CompressionResultWasm;
-  decompress: (tokens: Uint32Array) => Uint32Array;
+  decompress: (tokens: Uint32Array, config?: unknown) => Uint32Array;
   discover_patterns: (
     tokens: Uint32Array,
     minLength: number,
     maxLength: number
   ) => unknown;
   version: () => string;
+  StreamingCompressor: new (config: unknown) => StreamingCompressorWasm;
 }
 
 // Track initialization state
@@ -79,8 +80,8 @@ export async function initWasm(): Promise<void> {
       const env = detectEnvironment();
       
       // Dynamically import the wasm-pack generated module
-      // This uses the web target which has a proper init() function
-      const wasmModule = await import('./pkg/small_ltsc_core.js');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const wasmModule: any = await import('./pkg/small_ltsc_core.js');
       
       if (env === 'node') {
         // In Node.js, we need to provide the WASM file path/bytes
@@ -101,6 +102,7 @@ export async function initWasm(): Promise<void> {
         decompress: wasmModule.decompress,
         discover_patterns: wasmModule.discover_patterns,
         version: wasmModule.version,
+        StreamingCompressor: wasmModule.StreamingCompressor,
       };
       
       initialized = true;
@@ -125,7 +127,8 @@ export async function initWasmFromModule(
     return;
   }
 
-  const wasmModule = await import('./pkg/small_ltsc_core.js');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const wasmModule: any = await import('./pkg/small_ltsc_core.js');
   await wasmModule.default(module);
   
   wasmExports = {
@@ -133,6 +136,7 @@ export async function initWasmFromModule(
     decompress: wasmModule.decompress,
     discover_patterns: wasmModule.discover_patterns,
     version: wasmModule.version,
+    StreamingCompressor: wasmModule.StreamingCompressor,
   };
   
   initialized = true;
