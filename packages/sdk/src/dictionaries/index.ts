@@ -40,12 +40,12 @@ export interface StaticDictionary {
   patterns: Map<string, number>;
 }
 
-// Import dictionaries directly
-import pythonDict from './python.json';
-import typescriptDict from './typescript.json';
-import markdownDict from './markdown.json';
-import jsonDict from './json.json';
-import sqlDict from './sql.json';
+// Import dictionaries directly (with import attributes for Node.js 22+ compatibility)
+import pythonDict from './python.json' with { type: 'json' };
+import typescriptDict from './typescript.json' with { type: 'json' };
+import markdownDict from './markdown.json' with { type: 'json' };
+import jsonDict from './json.json' with { type: 'json' };
+import sqlDict from './sql.json' with { type: 'json' };
 
 /**
  * Available built-in static dictionaries.
