@@ -23,9 +23,9 @@ Small emerged from a pattern we kept seeing while building Triage and talking to
 ### Contributors
 
 This project was constructed by:
-- **Nikhil Srivastava** (University of California, Berkeley)
-- **Omansh Bainsla** (Georgia Tech)
-- **Sahil Chatiwala** (Georgia Tech)
+- **[Nikhil Srivastava](https://www.linkedin.com/in/srivastavan/)** (University of California, Berkeley)
+- **[Omansh Bainsla](https://www.linkedin.com/in/omanshb/)** (Georgia Tech)
+- **[Sahil Chatiwala](https://www.linkedin.com/in/sahil-chatiwala/)** (Georgia Tech)
 
 ## Why Small?
 
