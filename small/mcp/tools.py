@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from ..compressor import compress, decompress
 from ..config import CompressionConfig
 from ..pattern_cache import PatternCache
+from ..streaming import StreamingCompressor
 from .metrics import MetricsStore, OperationMetrics
 
 if TYPE_CHECKING:
@@ -92,9 +93,9 @@ TOOL_DEFINITIONS = [
                 },
                 "selection_mode": {
                     "type": "string",
-                    "enum": ["greedy", "optimal", "beam"],
+                    "enum": ["greedy", "optimal", "beam", "semantic"],
                     "default": "greedy",
-                    "description": "Pattern selection algorithm",
+                    "description": "Pattern selection algorithm (semantic requires embedding provider)",
                 },
             },
             "required": ["tokens"],
@@ -270,6 +271,44 @@ TOOL_DEFINITIONS = [
             "Clear the cross-document pattern cache. "
             "Useful when switching to a completely different document corpus. "
             "Returns stats from the cleared cache."
+        ),
+        "inputSchema": {"type": "object", "properties": {}},
+    },
+    {
+        "name": "compress_streaming",
+        "description": (
+            "Compress a large token sequence using memory-bounded streaming. "
+            "Processes tokens in chunks with configurable overlap for cross-boundary patterns. "
+            "Ideal for very long documents that might exceed memory limits."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "tokens": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "Array of token IDs to compress",
+                },
+                "chunk_size": {
+                    "type": "integer",
+                    "default": 8192,
+                    "description": "Target tokens per chunk (100-32768)",
+                },
+                "overlap_size": {
+                    "type": "integer",
+                    "default": 1024,
+                    "description": "Tokens to overlap between chunks for cross-boundary patterns",
+                },
+            },
+            "required": ["tokens"],
+        },
+    },
+    {
+        "name": "get_quality_summary",
+        "description": (
+            "Get quality metrics summary for recent compression operations. "
+            "Shows compression ratio statistics, degradation estimates, and health status. "
+            "Useful for monitoring compression quality over time."
         ),
         "inputSchema": {"type": "object", "properties": {}},
     },
@@ -774,6 +813,126 @@ class ToolHandlers:
         old_stats = self.pattern_cache.clear()
         return {"cleared": True, "previous_stats": old_stats}
 
+    def compress_streaming(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Handle compress_streaming tool call."""
+        tokens = params["tokens"]
+        # Allow larger inputs for streaming
+        self._validate_tokens(tokens, max_tokens=self.config.max_input_tokens * 10)
+
+        chunk_size = min(max(params.get("chunk_size", 8192), 100), 32768)
+        overlap_size = min(max(params.get("overlap_size", 1024), 0), chunk_size - 1)
+
+        config = self._build_config()
+        compressor = StreamingCompressor(
+            chunk_size=chunk_size,
+            overlap_size=overlap_size,
+            config=config,
+            pattern_cache=self.pattern_cache,
+        )
+
+        start = time.perf_counter()
+        compressed_chunks: list[list[Any]] = []
+        for result in compressor.compress_all(tokens):
+            compressed_chunks.append(result.compressed_tokens)
+        elapsed_ms = (time.perf_counter() - start) * 1000
+
+        stats = compressor.get_stats()
+        ratio = stats.compression_ratio
+        savings = stats.savings_percent
+
+        # Record metrics
+        self.metrics.record(
+            OperationMetrics(
+                timestamp=datetime.now().isoformat(),
+                operation="compress_streaming",
+                input_tokens=stats.total_input_tokens,
+                output_tokens=stats.total_output_tokens,
+                compression_ratio=ratio,
+                savings_percent=savings,
+                patterns_found=stats.total_patterns_found,
+                time_ms=elapsed_ms,
+                success=True,
+                metadata={
+                    "chunks_processed": stats.chunks_processed,
+                    "chunk_size": chunk_size,
+                    "overlap_size": overlap_size,
+                },
+            )
+        )
+
+        return {
+            "chunks": compressed_chunks,
+            "chunks_count": stats.chunks_processed,
+            "original_length": stats.total_input_tokens,
+            "compressed_length": stats.total_output_tokens,
+            "compression_ratio": round(ratio, 4),
+            "savings_percent": round(savings, 2),
+            "patterns_found": stats.total_patterns_found,
+            "throughput_tokens_per_sec": round(stats.throughput_tokens_per_sec, 0),
+            "time_ms": round(elapsed_ms, 2),
+        }
+
+    def get_quality_summary(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Handle get_quality_summary tool call."""
+        # Build quality summary from session metrics
+        ops = self.metrics.get_operations()
+        compress_ops = [
+            op
+            for op in ops
+            if op.get("operation")
+            in ("compress", "compress_text", "compress_context", "compress_streaming")
+        ]
+
+        if not compress_ops:
+            return {
+                "status": "no_data",
+                "message": "No compression operations recorded in this session",
+            }
+
+        ratios = [op["compression_ratio"] for op in compress_ops]
+        savings = [op["savings_percent"] for op in compress_ops]
+
+        # Compute stats
+        avg_ratio = sum(ratios) / len(ratios)
+        avg_savings = sum(savings) / len(savings)
+        min_ratio = min(ratios)
+        max_ratio = max(ratios)
+
+        # Health check
+        if avg_ratio > 0.95:
+            health = "poor"
+            recommendation = (
+                "Input has low repetition; compression provides minimal benefit"
+            )
+        elif avg_ratio > 0.85:
+            health = "fair"
+            recommendation = "Moderate compression achieved; consider longer min_length"
+        elif avg_ratio > 0.70:
+            health = "good"
+            recommendation = "Good compression achieved"
+        else:
+            health = "excellent"
+            recommendation = "Excellent compression achieved"
+
+        return {
+            "status": "ok",
+            "health": health,
+            "operations_count": len(compress_ops),
+            "compression_ratio": {
+                "mean": round(avg_ratio, 4),
+                "min": round(min_ratio, 4),
+                "max": round(max_ratio, 4),
+            },
+            "savings_percent": {
+                "mean": round(avg_savings, 2),
+                "min": round(min(savings), 2),
+                "max": round(max(savings), 2),
+            },
+            "total_tokens_processed": sum(op["input_tokens"] for op in compress_ops),
+            "total_tokens_saved": self.metrics.session.total_tokens_saved,
+            "recommendation": recommendation,
+        }
+
 
 def create_tool_handlers(
     config: MCPConfig,
@@ -794,4 +953,6 @@ def create_tool_handlers(
         "reset_session_metrics": handlers.reset_session_metrics,
         "get_pattern_cache_stats": handlers.get_pattern_cache_stats,
         "clear_pattern_cache": handlers.clear_pattern_cache,
+        "compress_streaming": handlers.compress_streaming,
+        "get_quality_summary": handlers.get_quality_summary,
     }

@@ -368,6 +368,8 @@ class TestCreateToolHandlers:
             "reset_session_metrics",
             "get_pattern_cache_stats",
             "clear_pattern_cache",
+            "compress_streaming",
+            "get_quality_summary",
         }
         assert set(handlers.keys()) == expected
 
