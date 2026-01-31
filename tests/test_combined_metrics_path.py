@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small import CompressionConfig, compress
+from delta import CompressionConfig, compress
 
 
 def test_combined_metrics_jsonl_written(tmp_path: Path):

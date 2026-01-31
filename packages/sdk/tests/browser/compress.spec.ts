@@ -14,7 +14,7 @@ test.describe('Browser Compression', () => {
   test('should load SDK in browser', async ({ page }) => {
     const loaded = await page.evaluate(async () => {
       try {
-        const sdk = await import('@small-ltsc/sdk');
+        const sdk = await import('@delta-ltsc/sdk');
         return typeof sdk.compress === 'function';
       } catch (e) {
         return false;
@@ -26,7 +26,7 @@ test.describe('Browser Compression', () => {
 
   test('should initialize WASM', async ({ page }) => {
     const initialized = await page.evaluate(async () => {
-      const { initWasm, isWasmInitialized } = await import('@small-ltsc/sdk');
+      const { initWasm, isWasmInitialized } = await import('@delta-ltsc/sdk');
       await initWasm();
       return isWasmInitialized();
     });
@@ -36,7 +36,7 @@ test.describe('Browser Compression', () => {
 
   test('should compress tokens', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { compress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       const tokens = [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3];
@@ -55,7 +55,7 @@ test.describe('Browser Compression', () => {
 
   test('should round-trip compress and decompress', async ({ page }) => {
     const roundTrip = await page.evaluate(async () => {
-      const { compress, decompress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, decompress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       const tokens = [1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3];
@@ -75,7 +75,7 @@ test.describe('Browser Compression', () => {
 
   test('should handle large inputs', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { compress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       // Generate 10K tokens with patterns
@@ -96,7 +96,7 @@ test.describe('Browser Compression', () => {
   test('should work with streaming compressor', async ({ page }) => {
     const result = await page.evaluate(async () => {
       const { createStreamingCompressor, initWasm } = await import(
-        '@small-ltsc/sdk'
+        '@delta-ltsc/sdk'
       );
       await initWasm();
 
@@ -122,7 +122,7 @@ test.describe('Browser Compression', () => {
 
   test('should discover patterns', async ({ page }) => {
     const patterns = await page.evaluate(async () => {
-      const { discoverPatterns, initWasm } = await import('@small-ltsc/sdk');
+      const { discoverPatterns, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       const tokens = [1, 2, 3, 1, 2, 3, 1, 2, 3];
@@ -134,7 +134,7 @@ test.describe('Browser Compression', () => {
 
   test('should handle configuration options', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { compress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       const tokens = [1, 2, 3, 1, 2, 3, 1, 2, 3];
@@ -161,7 +161,7 @@ test.describe('Browser Error Handling', () => {
 
   test('should handle empty input', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { compress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       const result = await compress([], {});
@@ -177,7 +177,7 @@ test.describe('Browser Error Handling', () => {
 
   test('should handle single token', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { compress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       const result = await compress([42], {});
@@ -194,7 +194,7 @@ test.describe('Browser Error Handling', () => {
 
   test('should handle unique tokens', async ({ page }) => {
     const result = await page.evaluate(async () => {
-      const { compress, initWasm } = await import('@small-ltsc/sdk');
+      const { compress, initWasm } = await import('@delta-ltsc/sdk');
       await initWasm();
 
       // All unique tokens - no patterns

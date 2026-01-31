@@ -7,7 +7,7 @@
  * Port of `small/quality_predictor.py` to TypeScript.
  */
 
-import type { CompressionResult } from '@small-ltsc/sdk';
+import type { CompressionResult } from '@delta-ltsc/sdk';
 import type { EmbeddingProvider } from './importance.js';
 
 /**

@@ -1,5 +1,5 @@
-from small import CompressionConfig
-from small.training import build_example, generate_training_examples
+from delta import CompressionConfig
+from delta.training import build_example, generate_training_examples
 
 
 def test_training_example_masks():

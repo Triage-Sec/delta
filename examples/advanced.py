@@ -1,6 +1,6 @@
 """Advanced usage example demonstrating ML integration features."""
 
-from small import (
+from delta import (
     compress, 
     decompress, 
     CompressionConfig,
@@ -11,8 +11,8 @@ from small import (
     create_predictor,
     RegionType,
 )
-from small.discovery_sa import discover_candidates_sa
-from small.subsumption import prune_subsumed_candidates
+from delta.discovery_sa import discover_candidates_sa
+from delta.subsumption import prune_subsumed_candidates
 
 
 def demonstrate_region_detection():

@@ -1,8 +1,8 @@
 import random
 
-from small import CompressionConfig, compress, decompress
-from small.discovery import discover_candidates
-from small.selection import select_occurrences
+from delta import CompressionConfig, compress, decompress
+from delta.discovery import discover_candidates
+from delta.selection import select_occurrences
 
 
 def test_round_trip_random_strings():

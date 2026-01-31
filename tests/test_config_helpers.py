@@ -1,4 +1,4 @@
-from small import CompressionConfig, with_cache_stats_source
+from delta import CompressionConfig, with_cache_stats_source
 
 
 def test_with_cache_stats_source():

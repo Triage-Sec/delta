@@ -1,4 +1,4 @@
-from small.utils import is_compressible
+from delta.utils import is_compressible
 
 
 def test_compressibility_cases():

@@ -19,7 +19,7 @@ import {
  *
  * @example
  * ```typescript
- * import { createStreamingCompressor, initWasm } from '@small-ltsc/sdk';
+ * import { createStreamingCompressor, initWasm } from '@delta-ltsc/sdk';
  *
  * await initWasm();
  *

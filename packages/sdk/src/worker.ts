@@ -64,7 +64,7 @@ export interface WorkerPool {
  *
  * @example
  * ```typescript
- * import { createWorkerPool } from '@small-ltsc/sdk';
+ * import { createWorkerPool } from '@delta-ltsc/sdk';
  *
  * const pool = await createWorkerPool(4);
  *
@@ -108,7 +108,7 @@ async function createBrowserWorkerPool(count: number): Promise<WorkerPool> {
 
       if (request.type === 'init') {
         try {
-          const { initWasm } = await import('@small-ltsc/sdk/wasm');
+          const { initWasm } = await import('@delta-ltsc/sdk/wasm');
           await initWasm();
           self.postMessage({ type: 'init', success: true, error: null });
         } catch (error) {
@@ -119,7 +119,7 @@ async function createBrowserWorkerPool(count: number): Promise<WorkerPool> {
 
       if (request.type === 'compress') {
         try {
-          const { compress } = await import('@small-ltsc/sdk');
+          const { compress } = await import('@delta-ltsc/sdk');
           const result = await compress(request.tokens, request.config);
           self.postMessage({ type: 'compress', requestId: request.requestId, result, error: null });
         } catch (error) {
@@ -130,7 +130,7 @@ async function createBrowserWorkerPool(count: number): Promise<WorkerPool> {
 
       if (request.type === 'decompress') {
         try {
-          const { decompress } = await import('@small-ltsc/sdk');
+          const { decompress } = await import('@delta-ltsc/sdk');
           const result = await decompress(request.tokens, request.config);
           self.postMessage({ type: 'decompress', requestId: request.requestId, result, error: null });
         } catch (error) {
@@ -245,7 +245,7 @@ async function createNodeWorkerPool(count: number): Promise<WorkerPool> {
     parentPort.on('message', async (request) => {
       if (request.type === 'init') {
         try {
-          const { initWasm } = await import('@small-ltsc/sdk/wasm');
+          const { initWasm } = await import('@delta-ltsc/sdk/wasm');
           await initWasm();
           parentPort.postMessage({ type: 'init', success: true, error: null });
         } catch (error) {
@@ -256,7 +256,7 @@ async function createNodeWorkerPool(count: number): Promise<WorkerPool> {
 
       if (request.type === 'compress') {
         try {
-          const { compress } = await import('@small-ltsc/sdk');
+          const { compress } = await import('@delta-ltsc/sdk');
           const result = await compress(request.tokens, request.config);
           parentPort.postMessage({ type: 'compress', requestId: request.requestId, result, error: null });
         } catch (error) {
@@ -267,7 +267,7 @@ async function createNodeWorkerPool(count: number): Promise<WorkerPool> {
 
       if (request.type === 'decompress') {
         try {
-          const { decompress } = await import('@small-ltsc/sdk');
+          const { decompress } = await import('@delta-ltsc/sdk');
           const result = await decompress(request.tokens, request.config);
           parentPort.postMessage({ type: 'decompress', requestId: request.requestId, result, error: null });
         } catch (error) {

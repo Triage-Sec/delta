@@ -1,15 +1,15 @@
-# MCP Server for Small LTSC
+# MCP Server for Delta LTSC
 
-Small LTSC provides an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that exposes token compression as tools for AI coding assistants like Cursor, Claude Desktop, Windsurf, and other MCP-compatible clients.
+Delta LTSC provides an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that exposes token compression as tools for AI coding assistants like Cursor, Claude Desktop, Windsurf, and other MCP-compatible clients.
 
 ## Installation
 
 ```bash
 # Install with MCP support
-pip install "small-ltsc[mcp]"
+pip install "delta-ltsc[mcp]"
 
 # Or install all optional dependencies
-pip install "small-ltsc[all,mcp]"
+pip install "delta-ltsc[all,mcp]"
 ```
 
 ## Quick Start
@@ -20,15 +20,15 @@ pip install "small-ltsc[all,mcp]"
 # Preferred (works reliably with venvs):
 python -m small.mcp
 
-# If `small-mcp` is on PATH (pip console script):
-small-mcp
+# If `delta-mcp` is on PATH (pip console script):
+delta-mcp
 ```
 
 The server communicates via stdio (JSON-RPC over stdin/stdout), which is the standard MCP transport.
 
 Note: On macOS, GUI apps often **don't inherit your shell PATH**. If your client logs show
-`spawn small-mcp ENOENT`, configure the server with an **absolute path** to your Python
-interpreter (or to `small-mcp`).
+`spawn delta-mcp ENOENT`, configure the server with an **absolute path** to your Python
+interpreter (or to `delta-mcp`).
 
 ## Client Configuration
 
@@ -41,9 +41,9 @@ Recommended configuration (absolute `python` path):
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
+    "delta-ltsc": {
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "small.mcp"]
+      "args": ["-m", "delta.mcp"]
     }
   }
 }
@@ -54,8 +54,8 @@ If you installed to a location already on PATH, this also works:
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
-      "command": "small-mcp"
+    "delta-ltsc": {
+      "command": "delta-mcp"
     }
   }
 }
@@ -68,9 +68,9 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
+    "delta-ltsc": {
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "small.mcp"]
+      "args": ["-m", "delta.mcp"]
     }
   }
 }
@@ -83,9 +83,9 @@ Add to Windsurf MCP configuration:
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
+    "delta-ltsc": {
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "small.mcp"]
+      "args": ["-m", "delta.mcp"]
     }
   }
 }
@@ -101,9 +101,9 @@ Warp provides native MCP support through its AI Agent Mode. To add Small:
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
+    "delta-ltsc": {
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "small.mcp"]
+      "args": ["-m", "delta.mcp"]
     }
   }
 }
@@ -122,9 +122,9 @@ Warp provides native MCP support through its AI Agent Mode. To add Small:
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
+    "delta-ltsc": {
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "small.mcp"],
+      "args": ["-m", "delta.mcp"],
       "env": {
         "SMALL_MCP_LOG_LEVEL": "DEBUG"
       }
@@ -138,7 +138,7 @@ Warp provides native MCP support through its AI Agent Mode. To add Small:
 For programmatic use:
 
 ```python
-from small.mcp import create_server, MCPConfig
+from delta.mcp import create_server, MCPConfig
 
 # Create with custom config
 config = MCPConfig(
@@ -283,7 +283,7 @@ import subprocess
 
 # Start server
 proc = subprocess.Popen(
-    ["small-mcp"],
+    ["delta-mcp"],
     stdin=subprocess.PIPE,
     stdout=subprocess.PIPE,
     text=True,
@@ -338,9 +338,9 @@ Use `get_historical_metrics` to query this data or process the file directly for
 
 ### Server won't start
 
-1. Ensure `small-ltsc[mcp]` is installed
+1. Ensure `delta-ltsc[mcp]` is installed
 2. Check Python version (requires 3.10+)
-3. Try running with debug logging: `SMALL_MCP_LOG_LEVEL=DEBUG small-mcp`
+3. Try running with debug logging: `SMALL_MCP_LOG_LEVEL=DEBUG delta-mcp`
 
 ### Tools not appearing in client
 

@@ -1,15 +1,15 @@
 """Tests for pattern subsumption analysis."""
 
 import pytest
-from small.subsumption import (
+from delta.subsumption import (
     build_subsumption_graph,
     find_maximal_patterns,
     prune_subsumed_candidates,
     rank_by_independent_value,
     deduplicate_candidates,
 )
-from small.types import Candidate
-from small.config import CompressionConfig
+from delta.types import Candidate
+from delta.config import CompressionConfig
 
 
 def _make_candidate(subseq: tuple, positions: tuple[int, ...]) -> Candidate:

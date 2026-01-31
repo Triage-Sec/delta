@@ -23,7 +23,7 @@ The test suite includes randomized checks that validate:
 
 ## Metrics
 
-Metrics are logged through `small.metrics`:
+Metrics are logged through `delta.metrics`:
 
 - Compression amount and ratio
 - Effective savings

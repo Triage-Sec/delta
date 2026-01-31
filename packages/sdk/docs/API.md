@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API documentation for `@small-ltsc/sdk`.
+Complete API documentation for `@delta-ltsc/sdk`.
 
 ## Table of Contents
 
@@ -31,7 +31,7 @@ async function initWasm(): Promise<void>
 
 **Example:**
 ```typescript
-import { initWasm, isWasmInitialized } from '@small-ltsc/sdk';
+import { initWasm, isWasmInitialized } from '@delta-ltsc/sdk';
 
 await initWasm();
 console.log(isWasmInitialized()); // true

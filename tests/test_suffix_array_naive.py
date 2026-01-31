@@ -1,4 +1,4 @@
-from small.suffix_array import build_suffix_array
+from delta.suffix_array import build_suffix_array
 
 
 def naive_suffix_array(tokens):

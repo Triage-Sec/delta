@@ -1,4 +1,4 @@
-from small import CompressionConfig, compress, decompress
+from delta import CompressionConfig, compress, decompress
 
 
 def test_integration_code_sample():

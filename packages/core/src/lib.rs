@@ -7,7 +7,7 @@
 //! # Example (from JavaScript)
 //!
 //! ```javascript
-//! import { initWasm, compress, decompress } from '@small-ltsc/sdk';
+//! import { initWasm, compress, decompress } from '@delta-ltsc/sdk';
 //!
 //! await initWasm();
 //! const tokens = [1, 2, 3, 1, 2, 3, 1, 2, 3];

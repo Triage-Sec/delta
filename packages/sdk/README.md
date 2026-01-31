@@ -1,9 +1,9 @@
-# @small-ltsc/sdk
+# @delta-ltsc/sdk
 
-[![npm](https://img.shields.io/npm/v/@small-ltsc/sdk)](https://www.npmjs.com/package/@small-ltsc/sdk)
+[![npm](https://img.shields.io/npm/v/@delta-ltsc/sdk)](https://www.npmjs.com/package/@delta-ltsc/sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
 
-TypeScript SDK for **Small LTSC** - Lossless Token Sequence Compression for LLMs.
+TypeScript SDK for **Delta LTSC** - Lossless Token Sequence Compression for LLMs.
 
 Reduce LLM inference costs by compressing repetitive token patterns in prompts while maintaining perfect reconstruction. Achieve 30-60% compression on structured inputs with a format that fine-tuned models can understand.
 
@@ -20,13 +20,13 @@ Reduce LLM inference costs by compressing repetitive token patterns in prompts w
 ## Installation
 
 ```bash
-npm install @small-ltsc/sdk
+npm install @delta-ltsc/sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { compress, decompress, initWasm } from '@small-ltsc/sdk';
+import { compress, decompress, initWasm } from '@delta-ltsc/sdk';
 
 // Initialize WASM module (required once)
 await initWasm();
@@ -80,7 +80,7 @@ Available dictionaries: `python-v1`, `typescript-v1`, `markdown-v1`, `json-v1`, 
 For large inputs that exceed memory constraints:
 
 ```typescript
-import { createStreamingCompressor } from '@small-ltsc/sdk';
+import { createStreamingCompressor } from '@delta-ltsc/sdk';
 
 const compressor = await createStreamingCompressor();
 
@@ -96,7 +96,7 @@ const result = await compressor.finish();
 Non-blocking compression for UI responsiveness:
 
 ```typescript
-import { createWorkerPool } from '@small-ltsc/sdk';
+import { createWorkerPool } from '@delta-ltsc/sdk';
 
 const pool = await createWorkerPool(4);
 const result = await pool.compress(tokens);
@@ -107,7 +107,7 @@ pool.terminate();
 
 ```html
 <script type="module">
-  import { compress, initWasm } from 'https://esm.sh/@small-ltsc/sdk';
+  import { compress, initWasm } from 'https://esm.sh/@delta-ltsc/sdk';
   
   await initWasm();
   const result = await compress([1, 2, 3, 1, 2, 3]);
@@ -159,18 +159,18 @@ pool.terminate();
 
 - [Quick Start Guide](./docs/QUICKSTART.md)
 - [API Reference](./docs/API.md)
-- [Main Repository](https://github.com/triage-sec/small)
+- [Main Repository](https://github.com/delta-ltsc/delta)
 
 ## Optional ML Features
 
 For pattern importance scoring and quality prediction:
 
 ```bash
-npm install @small-ltsc/ml
+npm install @delta-ltsc/ml
 ```
 
 ```typescript
-import { HeuristicQualityPredictor } from '@small-ltsc/ml';
+import { HeuristicQualityPredictor } from '@delta-ltsc/ml';
 
 const predictor = new HeuristicQualityPredictor();
 const prediction = await predictor.predict(compressionResult);

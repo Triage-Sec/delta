@@ -132,7 +132,7 @@ jobs:
       - name: Install ML dependencies with packed SDK
         working-directory: packages/ml
         run: |
-          npm install ../sdk/small-ltsc-sdk-*.tgz
+          npm install ../sdk/delta-ltsc-sdk-*.tgz
           npm install
 
       - name: Build ML package

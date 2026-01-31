@@ -9,18 +9,18 @@ import warnings
 
 import pytest
 
-from small.config import CompressionConfig
-from small.compressor import compress
-from small.selection import select_occurrences, _select_semantic_with_fallback
-from small.selection_semantic import (
+from delta.config import CompressionConfig
+from delta.compressor import compress
+from delta.selection import select_occurrences, _select_semantic_with_fallback
+from delta.selection_semantic import (
     SemanticWeight,
     _extract_context,
     _compute_pairwise_similarity,
     _build_occurrences,
     select_occurrences_semantic,
 )
-from small.types import Candidate
-from small.embeddings import (
+from delta.types import Candidate
+from delta.embeddings import (
     EmbeddingProvider,
     create_provider,
     get_provider_from_config,

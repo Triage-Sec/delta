@@ -1,10 +1,10 @@
 [package]
-name = "small-ltsc-core"
+name = "delta-ltsc-core"
 version = "0.1.0"
 edition = "2021"
-description = "WASM core for Small LTSC - Lossless Token Sequence Compression"
+description = "WASM core for Delta LTSC - Lossless Token Sequence Compression"
 license = "MIT"
-repository = "https://github.com/triage-sec/small"
+repository = "https://github.com/delta-ltsc/delta"
 keywords = ["compression", "llm", "tokens", "wasm"]
 
 [lib]

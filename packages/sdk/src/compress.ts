@@ -22,7 +22,7 @@ import { loadStaticDictionary, type StaticDictionary } from './dictionaries/inde
  *
  * @example
  * ```typescript
- * import { compress, decompress, initWasm } from '@small-ltsc/sdk';
+ * import { compress, decompress, initWasm } from '@delta-ltsc/sdk';
  *
  * await initWasm();
  *

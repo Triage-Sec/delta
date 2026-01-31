@@ -13,7 +13,7 @@ Small operates on token sequences, not raw text. Tokens are represented as hasha
 ## Minimal Example
 
 ```python
-from small import compress, decompress, CompressionConfig
+from delta import compress, decompress, CompressionConfig
 
 tokens = ["the", "quick", "brown", "fox"] * 10
 config = CompressionConfig(verify=True)
@@ -27,7 +27,7 @@ assert restored == tokens
 ## Configuration Guide
 
 ```python
-from small import CompressionConfig
+from delta import CompressionConfig
 
 config = CompressionConfig(
     # Discovery
@@ -66,7 +66,7 @@ config = CompressionConfig(
 ### AST-Aware Compression (Python)
 
 ```python
-from small import compress_python_source
+from delta import compress_python_source
 
 tokens, result = compress_python_source("def foo(): return bar()")
 ```
@@ -74,7 +74,7 @@ tokens, result = compress_python_source("def foo(): return bar()")
 ### Region-Aware Compression
 
 ```python
-from small import detect_regions, filter_candidates_by_region
+from delta import detect_regions, filter_candidates_by_region
 
 regions = detect_regions(tokens)
 filtered = filter_candidates_by_region(candidates, regions, tokens)
@@ -83,7 +83,7 @@ filtered = filter_candidates_by_region(candidates, regions, tokens)
 ### Importance Scoring
 
 ```python
-from small import create_default_scorer, adjust_candidate_priorities
+from delta import create_default_scorer, adjust_candidate_priorities
 
 scorer = create_default_scorer()
 scores = scorer.score_patterns(tokens, candidates)
@@ -93,7 +93,7 @@ adjusted = adjust_candidate_priorities(candidates, scores)
 ### Quality Prediction
 
 ```python
-from small import create_predictor
+from delta import create_predictor
 
 predictor = create_predictor(task_type="code")
 prediction = predictor.predict(tokens, result)

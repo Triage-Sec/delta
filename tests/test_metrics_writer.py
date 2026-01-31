@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small.metrics_writer import write_offline_metrics_jsonl
+from delta.metrics_writer import write_offline_metrics_jsonl
 
 
 def test_write_offline_metrics_jsonl(tmp_path: Path):

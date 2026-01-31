@@ -1,13 +1,13 @@
 """Tests for compression quality prediction."""
 
 import pytest
-from small.quality_predictor import (
+from delta.quality_predictor import (
     QualityPrediction,
     CompressionQualityPredictor,
     create_predictor,
     evaluate_compression_quality,
 )
-from small.types import CompressionResult
+from delta.types import CompressionResult
 
 
 def _make_result(

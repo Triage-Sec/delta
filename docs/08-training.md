@@ -6,7 +6,7 @@
 - Loss is computed only on output tokens.
 - Use mixed compression (default 50/50) to preserve uncompressed handling.
 
-`small.training` provides:
+`delta.training` provides:
 
 - `build_example(prompt, output, config, compress_prompt)`
 - `generate_training_examples(samples, config, compress_ratio)`
@@ -14,7 +14,7 @@
 
 ## Meta-Token Vocabulary Extension
 
-Use `small.vocab.plan_vocab_extension` to list required meta-tokens and special tokens.
+Use `delta.vocab.plan_vocab_extension` to list required meta-tokens and special tokens.
 
 For Hugging Face tokenizers, `add_tokens_to_hf_tokenizer` can extend the vocabulary.
 

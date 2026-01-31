@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from small import CompressionConfig, compress
-from small.embedding_cache import SQLiteCacheConfig, SQLiteEmbeddingCache
+from delta import CompressionConfig, compress
+from delta.embedding_cache import SQLiteCacheConfig, SQLiteEmbeddingCache
 
 
 def test_combined_metrics_with_cache_source(tmp_path: Path):

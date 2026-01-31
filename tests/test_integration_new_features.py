@@ -1,8 +1,8 @@
 """Integration tests for new compression features."""
 
 import pytest
-from small import compress, CompressionConfig
-from small.compressor import decompress
+from delta import compress, CompressionConfig
+from delta.compressor import decompress
 
 
 def test_compression_roundtrip_with_greedy():

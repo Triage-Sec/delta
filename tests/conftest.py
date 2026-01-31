@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from small.corpus import load_jsonl
+from delta.corpus import load_jsonl
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 CORPORA_DIR = FIXTURES_DIR / "corpora"
@@ -10,7 +10,7 @@ BENCHMARKS_DIR = FIXTURES_DIR / "benchmarks"
 
 
 @pytest.fixture
-def python_small_corpus():
+def python_delta_corpus():
     return load_jsonl(CORPORA_DIR / "code" / "python_small.jsonl")
 
 

@@ -1,7 +1,7 @@
 """Tests for selection algorithm improvements."""
 
 import pytest
-from small.selection import (
+from delta.selection import (
     _min_count_for_compressibility,
     _compute_savings,
     _compute_marginal_savings,
@@ -11,8 +11,8 @@ from small.selection import (
     _beam_search_with_savings,
     select_occurrences,
 )
-from small.types import Candidate, Occurrence
-from small.config import CompressionConfig
+from delta.types import Candidate, Occurrence
+from delta.config import CompressionConfig
 
 
 def test_min_count_for_compressibility():

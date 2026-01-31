@@ -15,7 +15,7 @@ import { type TokenInput, normalizeTokens } from './types.js';
  *
  * @example
  * ```typescript
- * import { compress, decompress, initWasm } from '@small-ltsc/sdk';
+ * import { compress, decompress, initWasm } from '@delta-ltsc/sdk';
  *
  * await initWasm();
  *

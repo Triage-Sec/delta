@@ -8,9 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from small.mcp.config import MCPConfig
-from small.mcp.metrics import MetricsStore, OperationMetrics, SessionStats
-from small.mcp.tools import ToolHandlers, TOOL_DEFINITIONS, create_tool_handlers
+from delta.mcp.config import MCPConfig
+from delta.mcp.metrics import MetricsStore, OperationMetrics, SessionStats
+from delta.mcp.tools import ToolHandlers, TOOL_DEFINITIONS, create_tool_handlers
 
 
 @pytest.fixture

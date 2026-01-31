@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small.corpus import load_jsonl
+from delta.corpus import load_jsonl
 
 
 def test_load_jsonl(tmp_path: Path):

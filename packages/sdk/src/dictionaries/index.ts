@@ -82,7 +82,7 @@ interface DictionaryJson {
  *
  * @example
  * ```typescript
- * import { loadStaticDictionary, compress } from '@small-ltsc/sdk';
+ * import { loadStaticDictionary, compress } from '@delta-ltsc/sdk';
  *
  * const pythonDict = await loadStaticDictionary('python-v1');
  *

@@ -1,7 +1,7 @@
 """Tests for adaptive region-aware compression."""
 
 import pytest
-from small.adaptive import (
+from delta.adaptive import (
     RegionType,
     Region,
     detect_regions,
@@ -10,7 +10,7 @@ from small.adaptive import (
     get_region_stats,
     DEFAULT_MARKERS,
 )
-from small.types import Candidate
+from delta.types import Candidate
 
 
 def _make_candidate(subseq: tuple, positions: tuple[int, ...], priority: int = 0) -> Candidate:

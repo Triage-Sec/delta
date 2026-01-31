@@ -4,7 +4,7 @@
  * Port of `small/pattern_importance.py` to TypeScript.
  */
 
-import type { DiscoveredPattern, TokenSeq } from '@small-ltsc/sdk';
+import type { DiscoveredPattern, TokenSeq } from '@delta-ltsc/sdk';
 
 /**
  * Interface for embedding providers.

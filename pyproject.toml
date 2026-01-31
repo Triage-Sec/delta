@@ -1,5 +1,5 @@
 [project]
-name = "small-ltsc"
+name = "delta-ltsc"
 version = "0.2.20"
 description = "Lossless token sequence compression for large language models"
 readme = "README.md"
@@ -50,21 +50,21 @@ embeddings = [
   "redis>=5.0.0",
 ]
 analysis = [
-  "small-ltsc[embeddings]",
+  "delta-ltsc[embeddings]",
   "scikit-learn>=1.3.0",
   "scipy>=1.11.0",
   "matplotlib>=3.7.0",
   "pandas>=2.0.0",
 ]
 training = [
-  "small-ltsc[tokenizers]",
+  "delta-ltsc[tokenizers]",
   "datasets>=2.14.0",
   "accelerate>=0.24.0",
   "peft>=0.6.0",
   "wandb>=0.15.0",
 ]
 dev = [
-  "small-ltsc[analysis,training]",
+  "delta-ltsc[analysis,training]",
   "pytest>=7.4",
   "pytest-cov>=4.1.0",
   "pytest-benchmark>=4.0.0",
@@ -73,16 +73,16 @@ dev = [
   "ruff==0.14.14",
   "pre-commit>=3.5.0",
 ]
-all = ["small-ltsc[tokenizers,embeddings,analysis,training]"]
+all = ["delta-ltsc[tokenizers,embeddings,analysis,training]"]
 mcp = [
   "mcp>=1.0.0",
 ]
 
 [project.scripts]
-small-mcp = "small.mcp:run_server"
+delta-mcp = "delta.mcp:run_server"
 
 [tool.setuptools.packages.find]
-include = ["small*"]
+include = ["delta*"]
 exclude = ["packages*", "package*", ".venv*", "tests*", "docs*", "scripts*", ".github*", "dist*", "build*"]
 
 [tool.pytest.ini_options]

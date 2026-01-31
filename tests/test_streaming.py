@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import pytest
 
-from small.compressor import compress, decompress
-from small.config import CompressionConfig
-from small.pattern_cache import PatternCache
-from small.streaming import (
+from delta.compressor import compress, decompress
+from delta.config import CompressionConfig
+from delta.pattern_cache import PatternCache
+from delta.streaming import (
     StreamingCompressor,
     StreamingResult,
     StreamingStats,

@@ -1,17 +1,17 @@
-# @small-ltsc/ml
+# @delta-ltsc/ml
 
-[![npm](https://img.shields.io/npm/v/@small-ltsc/ml)](https://www.npmjs.com/package/@small-ltsc/ml)
+[![npm](https://img.shields.io/npm/v/@delta-ltsc/ml)](https://www.npmjs.com/package/@delta-ltsc/ml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
 
-Optional ML features for **Small LTSC** - Pattern importance scoring, quality prediction, and adaptive region detection.
+Optional ML features for **Delta LTSC** - Pattern importance scoring, quality prediction, and adaptive region detection.
 
 ## Installation
 
 ```bash
-npm install @small-ltsc/ml @small-ltsc/sdk
+npm install @delta-ltsc/ml @delta-ltsc/sdk
 ```
 
-Note: `@small-ltsc/sdk` is a required peer dependency.
+Note: `@delta-ltsc/sdk` is a required peer dependency.
 
 ## Features
 
@@ -24,8 +24,8 @@ Note: `@small-ltsc/sdk` is a required peer dependency.
 Score patterns to preserve semantically important content:
 
 ```typescript
-import { PositionalImportanceScorer, filterByImportance } from '@small-ltsc/ml';
-import { discoverPatterns } from '@small-ltsc/sdk';
+import { PositionalImportanceScorer, filterByImportance } from '@delta-ltsc/ml';
+import { discoverPatterns } from '@delta-ltsc/sdk';
 
 const scorer = new PositionalImportanceScorer({ decayRate: 2.0 });
 const patterns = await discoverPatterns(tokens);
@@ -40,7 +40,7 @@ const safeToCompress = filterByImportance(patterns, scores, 0.8);
 For more accurate importance scoring using an embedding model:
 
 ```typescript
-import { EmbeddingImportanceScorer } from '@small-ltsc/ml';
+import { EmbeddingImportanceScorer } from '@delta-ltsc/ml';
 
 const scorer = new EmbeddingImportanceScorer(embeddingProvider, {
   contextWindow: 5,
@@ -54,8 +54,8 @@ const scores = await scorer.scorePatterns(tokens, patterns);
 Predict if compressed output will maintain quality before committing:
 
 ```typescript
-import { createQualityPredictor } from '@small-ltsc/ml';
-import { compress } from '@small-ltsc/sdk';
+import { createQualityPredictor } from '@delta-ltsc/ml';
+import { compress } from '@delta-ltsc/sdk';
 
 const predictor = createQualityPredictor();
 const result = await compress(tokens);
@@ -85,7 +85,7 @@ console.log(prediction.features);
 Detect semantic regions for adaptive compression strategies:
 
 ```typescript
-import { detectRegions, RegionType, filterPatternsByRegion } from '@small-ltsc/ml';
+import { detectRegions, RegionType, filterPatternsByRegion } from '@delta-ltsc/ml';
 
 const regions = detectRegions(tokens, {
   systemMarkers: [[58, 71905, 60]], // [SYSTEM] token sequence
@@ -115,7 +115,7 @@ const filtered = filterPatternsByRegion(patterns, regions, tokens);
 Implement the `EmbeddingProvider` interface for your embedding model:
 
 ```typescript
-import type { EmbeddingProvider } from '@small-ltsc/ml';
+import type { EmbeddingProvider } from '@delta-ltsc/ml';
 
 class OpenAIEmbeddings implements EmbeddingProvider {
   async embed(tokens: readonly number[]): Promise<Float32Array> {

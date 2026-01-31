@@ -1,7 +1,7 @@
-from small import AnalysisConfig, OfflinePipelineConfig, run_offline_analysis
-from small.embedding_cache import SQLiteCacheConfig, SQLiteEmbeddingCache
+from delta import AnalysisConfig, OfflinePipelineConfig, run_offline_analysis
+from delta.embedding_cache import SQLiteCacheConfig, SQLiteEmbeddingCache
 
-from small.corpus import CorpusDocument
+from delta.corpus import CorpusDocument
 
 
 def test_offline_pipeline_cache_stats(tmp_path):

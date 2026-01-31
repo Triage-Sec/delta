@@ -1,5 +1,5 @@
 {
-  "name": "@small-ltsc/sdk",
+  "name": "@delta-ltsc/sdk",
 "version": "0.2.20",
   "description": "TypeScript SDK for Small LTSC - Lossless Token Sequence Compression",
   "type": "module",
@@ -50,12 +50,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/triage-sec/small.git"
+    "url": "git+https://github.com/delta-ltsc/delta.git"
   },
   "bugs": {
-    "url": "https://github.com/triage-sec/small/issues"
+    "url": "https://github.com/delta-ltsc/delta/issues"
   },
-  "homepage": "https://github.com/triage-sec/small#readme",
+  "homepage": "https://github.com/delta-ltsc/delta#readme",
   "devDependencies": {
     "@playwright/test": "^1.40.0",
     "@types/node": "^20.10.0",

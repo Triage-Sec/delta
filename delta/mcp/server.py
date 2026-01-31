@@ -109,7 +109,7 @@ class MCPServer:
                     "tools": {},
                 },
                 "serverInfo": {
-                    "name": "small-ltsc",
+                    "name": "delta-ltsc",
                     "version": __version__,
                 },
             },

@@ -13,7 +13,7 @@ Not all patterns are equally important for downstream tasks. Importance scoring 
 Patterns at the beginning of a prompt (instructions, system context) are often more critical.
 
 ```python
-from small.pattern_importance import PositionalImportanceScorer
+from delta.pattern_importance import PositionalImportanceScorer
 
 scorer = PositionalImportanceScorer(decay_rate=2.0)
 scores = scorer.score_patterns(tokens, candidates)
@@ -25,7 +25,7 @@ scores = scorer.score_patterns(tokens, candidates)
 Rare patterns may carry more unique information than common boilerplate.
 
 ```python
-from small.pattern_importance import FrequencyImportanceScorer
+from delta.pattern_importance import FrequencyImportanceScorer
 
 scorer = FrequencyImportanceScorer()
 scores = scorer.score_patterns(tokens, candidates)
@@ -37,7 +37,7 @@ scores = scorer.score_patterns(tokens, candidates)
 Longer patterns often represent meaningful structures (function signatures, repeated blocks).
 
 ```python
-from small.pattern_importance import LengthImportanceScorer
+from delta.pattern_importance import LengthImportanceScorer
 
 scorer = LengthImportanceScorer()
 scores = scorer.score_patterns(tokens, candidates)
@@ -49,8 +49,8 @@ scores = scorer.score_patterns(tokens, candidates)
 Patterns appearing in diverse semantic contexts carry unique information each time.
 
 ```python
-from small.pattern_importance import EmbeddingImportanceScorer
-from small.embeddings import HuggingFaceEmbeddingProvider
+from delta.pattern_importance import EmbeddingImportanceScorer
+from delta.embeddings import HuggingFaceEmbeddingProvider
 
 provider = HuggingFaceEmbeddingProvider(model_name="all-MiniLM-L6-v2")
 scorer = EmbeddingImportanceScorer(
@@ -68,7 +68,7 @@ scores = scorer.score_patterns(tokens, candidates)
 Combine multiple signals with configurable weights:
 
 ```python
-from small.pattern_importance import CompositeImportanceScorer, create_default_scorer
+from delta.pattern_importance import CompositeImportanceScorer, create_default_scorer
 
 # Default: positional (40%), frequency (30%), length (30%)
 scorer = create_default_scorer()
@@ -88,7 +88,7 @@ scorer = CompositeImportanceScorer(
 Adjust candidate priorities based on importance:
 
 ```python
-from small.pattern_importance import adjust_candidate_priorities, filter_high_importance_candidates
+from delta.pattern_importance import adjust_candidate_priorities, filter_high_importance_candidates
 
 # Adjust priorities (low importance → higher compression priority)
 adjusted_candidates = adjust_candidate_priorities(
@@ -125,7 +125,7 @@ Different parts of a prompt have different compression tolerances.
 Automatic detection based on markers:
 
 ```python
-from small.adaptive import detect_regions, RegionType
+from delta.adaptive import detect_regions, RegionType
 
 tokens = ["[SYSTEM]", "You", "are", "helpful", "[USER]", "Hello", "```", "code", "```"]
 regions = detect_regions(tokens)
@@ -144,7 +144,7 @@ for region in regions:
 ### Custom Markers
 
 ```python
-from small.adaptive import detect_regions, RegionType
+from delta.adaptive import detect_regions, RegionType
 
 custom_markers = {
     "<|system|>": RegionType.SYSTEM,
@@ -160,7 +160,7 @@ regions = detect_regions(tokens, markers=custom_markers)
 When no markers are present:
 
 ```python
-from small.adaptive import detect_regions_heuristic
+from delta.adaptive import detect_regions_heuristic
 
 # Assume first 10% is system context
 regions = detect_regions_heuristic(tokens, system_fraction=0.1)
@@ -169,7 +169,7 @@ regions = detect_regions_heuristic(tokens, system_fraction=0.1)
 ### Applying Region Filters
 
 ```python
-from small.adaptive import filter_candidates_by_region
+from delta.adaptive import filter_candidates_by_region
 
 # Adjust candidates based on their containing regions
 filtered_candidates = filter_candidates_by_region(candidates, regions, tokens)
@@ -184,8 +184,8 @@ Before committing to compression, predict whether it will hurt downstream task p
 ### Basic Usage
 
 ```python
-from small import compress, CompressionConfig
-from small.quality_predictor import create_predictor
+from delta import compress, CompressionConfig
+from delta.quality_predictor import create_predictor
 
 config = CompressionConfig()
 result = compress(tokens, config)
@@ -226,7 +226,7 @@ The predictor returns one of three recommendations:
 For production systems where quality is critical:
 
 ```python
-from small.quality_predictor import CompressionQualityPredictor
+from delta.quality_predictor import CompressionQualityPredictor
 
 predictor = CompressionQualityPredictor(
     task_type="code",
@@ -260,12 +260,12 @@ else:
 Complete workflow combining all ML features:
 
 ```python
-from small import compress, CompressionConfig
-from small.discovery_sa import discover_candidates_sa
-from small.pattern_importance import create_default_scorer, adjust_candidate_priorities
-from small.adaptive import detect_regions, filter_candidates_by_region
-from small.subsumption import prune_subsumed_candidates
-from small.quality_predictor import create_predictor
+from delta import compress, CompressionConfig
+from delta.discovery_sa import discover_candidates_sa
+from delta.pattern_importance import create_default_scorer, adjust_candidate_priorities
+from delta.adaptive import detect_regions, filter_candidates_by_region
+from delta.subsumption import prune_subsumed_candidates
+from delta.quality_predictor import create_predictor
 
 # 1. Discover candidates
 config = CompressionConfig()
@@ -308,7 +308,7 @@ Semantic selection uses embeddings to make smarter pattern selection decisions. 
 ### Basic Usage
 
 ```python
-from small import compress, CompressionConfig
+from delta import compress, CompressionConfig
 
 config = CompressionConfig(
     selection_mode="semantic",
@@ -377,9 +377,9 @@ result = compress(tokens, config)
 For more control, use the semantic selection function directly:
 
 ```python
-from small.embeddings import create_provider
-from small.selection_semantic import select_occurrences_semantic
-from small.discovery_sa import discover_candidates_sa
+from delta.embeddings import create_provider
+from delta.selection_semantic import select_occurrences_semantic
+from delta.discovery_sa import discover_candidates_sa
 
 # Create provider
 provider = create_provider("openai", model="text-embedding-3-small")

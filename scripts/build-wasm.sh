@@ -12,7 +12,7 @@ SDK_DIR="$ROOT_DIR/packages/sdk"
 
 BUILD_MODE="${1:-release}"
 
-echo "Building Small LTSC WASM core..."
+echo "Building Delta LTSC WASM core..."
 echo "Mode: $BUILD_MODE"
 echo "Core dir: $CORE_DIR"
 echo "SDK dir: $SDK_DIR"

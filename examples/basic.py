@@ -1,6 +1,6 @@
 """Basic usage example for Small compression."""
 
-from small import compress, decompress, CompressionConfig
+from delta import compress, decompress, CompressionConfig
 
 
 def main():

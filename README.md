@@ -1,14 +1,14 @@
-# Small
+# Delta
 
 **Lossless Token Sequence Compression for Large Language Models**
 
-[![PyPI](https://img.shields.io/pypi/v/small-ltsc)](https://pypi.org/project/small-ltsc/)
-[![npm](https://img.shields.io/npm/v/@small-ltsc/sdk)](https://www.npmjs.com/package/@small-ltsc/sdk)
+[![PyPI](https://img.shields.io/pypi/v/delta-ltsc)](https://pypi.org/project/delta-ltsc/)
+[![npm](https://img.shields.io/npm/v/@delta-ltsc/sdk)](https://www.npmjs.com/package/@delta-ltsc/sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 
-Small is a production-ready lossless compression system that reduces the computational and economic cost of LLM inference by eliminating redundancy in input sequences before they reach the model. It replaces repeated multi-token patterns with compact meta-token references backed by a learnable dictionary format, achieving 30-60% compression on structured inputs while guaranteeing perfect reconstruction.
+Delta is a production-ready lossless compression system that reduces the computational and economic cost of LLM inference by eliminating redundancy in input sequences before they reach the model. It replaces repeated multi-token patterns with compact meta-token references backed by a learnable dictionary format, achieving 30-60% compression on structured inputs while guaranteeing perfect reconstruction.
 
 ## About
 
@@ -16,9 +16,9 @@ Small is a production-ready lossless compression system that reduces the computa
 
 Triage is building the resiliency layer for AI systems. We expose deep observability into staging environments so coding agents can statically reason about codebases, predict runtime behavior, and remediate production issues autonomously. On the research side, we're filling latent space in frozen models to address known system weaknesses, building dynamic guardrails for real-time threat detection, and designing bureaucratic authorization flows that route sensitive operations to the right humans at the right time. The thesis behind everything we build: security should learn from every failure and compound over time, not reset with each new signature. We're compressing MTTR toward zero by treating every incident as training data for the next.
 
-### Why We Built Small
+### Why We Built Delta
 
-Small emerged from a pattern we kept seeing while building Triage and talking to teams deploying LLM-powered products: context-augmented generation produces massively redundant token sequences, and inference costs scale linearly with every one of them. The same boilerplate, the same structural patterns, the same retrieved chunks appear repeatedly across requests. LTSC (Lossless Token Sequence Compression) identifies and compresses these recurring patterns without semantic loss, targeting the specific redundancy profiles that coding agents, retrieval systems, and multi-turn conversations create. We built it as an open-source contribution because inference cost remains one of the most underappreciated bottlenecks to AI adoption, particularly for the agentic workflows where context windows balloon quickly. Solving it at the compression layer lets teams ship more capable agents without burning through API budgets or making architectural compromises to stay under token limits.
+Delta emerged from a pattern we kept seeing while building Triage and talking to teams deploying LLM-powered products: context-augmented generation produces massively redundant token sequences, and inference costs scale linearly with every one of them. The same boilerplate, the same structural patterns, the same retrieved chunks appear repeatedly across requests. LTSC (Lossless Token Sequence Compression) identifies and compresses these recurring patterns without semantic loss, targeting the specific redundancy profiles that coding agents, retrieval systems, and multi-turn conversations create. We built it as an open-source contribution because inference cost remains one of the most underappreciated bottlenecks to AI adoption, particularly for the agentic workflows where context windows balloon quickly. Solving it at the compression layer lets teams ship more capable agents without burning through API budgets or making architectural compromises to stay under token limits.
 
 ### Contributors
 
@@ -27,11 +27,11 @@ This project was constructed by:
 - **[Omansh Bainsla](https://www.linkedin.com/in/omanshb/)** (Georgia Tech)
 - **[Sahil Chatiwala](https://www.linkedin.com/in/sahil-chatiwala/)** (Georgia Tech)
 
-## Why Small?
+## Why Delta?
 
 As context augmentation techniques become standard practice (retrieval-augmented generation, tool schemas, code repositories, policy documents, multi-turn conversations), input sequences increasingly contain repeated subsequences that consume context window budget and quadratic attention compute without contributing new information.
 
-**Small addresses this by:**
+**Delta addresses this by:**
 - Compressing redundant patterns at the token level before inference
 - Maintaining a learnable dictionary format that models can understand with minimal fine-tuning
 - Guaranteeing lossless round-trip reconstruction
@@ -52,22 +52,22 @@ As context augmentation techniques become standard practice (retrieval-augmented
 ### Python
 
 ```bash
-pip install small-ltsc
+pip install delta-ltsc
 
 # With optional dependencies
-pip install "small-ltsc[analysis]"   # ML analysis tools
-pip install "small-ltsc[training]"   # Fine-tuning utilities
-pip install "small-ltsc[mcp]"        # MCP server for AI assistants
-pip install "small-ltsc[all]"        # Everything
+pip install "delta-ltsc[analysis]"   # ML analysis tools
+pip install "delta-ltsc[training]"   # Fine-tuning utilities
+pip install "delta-ltsc[mcp]"        # MCP server for AI assistants
+pip install "delta-ltsc[all]"        # Everything
 ```
 
 ### TypeScript/JavaScript
 
 ```bash
-npm install @small-ltsc/sdk
+npm install @delta-ltsc/sdk
 
 # Optional ML features
-npm install @small-ltsc/ml
+npm install @delta-ltsc/ml
 ```
 
 ## Quick Start
@@ -75,7 +75,7 @@ npm install @small-ltsc/ml
 ### Python
 
 ```python
-from small import compress, decompress, CompressionConfig
+from delta import compress, decompress, CompressionConfig
 
 # Compress a token sequence
 tokens = [101, 2054, 2003, 1996, 4248, 102] * 20  # Repeated pattern
@@ -94,7 +94,7 @@ assert restored == tokens
 ### TypeScript
 
 ```typescript
-import { compress, decompress, initWasm } from '@small-ltsc/sdk';
+import { compress, decompress, initWasm } from '@delta-ltsc/sdk';
 
 // Initialize WASM (required once)
 await initWasm();
@@ -112,7 +112,7 @@ const restored = await decompress(result.serializedTokens);
 
 ## How It Works
 
-Small identifies repeated token subsequences and replaces them with meta-tokens, storing the mapping in a prefix dictionary:
+Delta identifies repeated token subsequences and replaces them with meta-tokens, storing the mapping in a prefix dictionary:
 
 ```
 Original:  [the, cat, sat, on, the, mat, the, cat, ran]
@@ -137,7 +137,7 @@ This mathematical constraint ensures compression never increases sequence length
 ### Python
 
 ```python
-from small import CompressionConfig
+from delta import CompressionConfig
 
 config = CompressionConfig(
     # Pattern discovery
@@ -201,7 +201,7 @@ Available: `python-v1`, `typescript-v1`, `markdown-v1`, `json-v1`, `sql-v1`
 ### Streaming Compression
 
 ```typescript
-import { createStreamingCompressor } from '@small-ltsc/sdk';
+import { createStreamingCompressor } from '@delta-ltsc/sdk';
 
 const compressor = await createStreamingCompressor();
 for await (const chunk of tokenStream) {
@@ -213,7 +213,7 @@ const result = await compressor.finish();
 ### Region-Aware Compression
 
 ```python
-from small import detect_regions, filter_candidates_by_region
+from delta import detect_regions, filter_candidates_by_region
 
 # Detect semantic regions (SYSTEM, USER, CONTEXT, CODE)
 regions = detect_regions(tokens)
@@ -225,7 +225,7 @@ filtered = filter_candidates_by_region(candidates, regions, tokens)
 ### Quality Prediction
 
 ```python
-from small import create_predictor
+from delta import create_predictor
 
 predictor = create_predictor(task_type="code")
 prediction = predictor.predict(tokens, result)
@@ -241,10 +241,10 @@ Small provides an MCP server for integration with AI coding assistants:
 
 ```bash
 # Install with MCP support
-pip install "small-ltsc[mcp]"
+pip install "delta-ltsc[mcp]"
 
 # Run the server
-small-mcp
+delta-mcp
 ```
 
 Configure in Cursor/Claude Desktop (`~/.cursor/mcp.json`). Prefer **absolute paths** (GUI apps often don't inherit your shell `PATH`):
@@ -252,22 +252,22 @@ Configure in Cursor/Claude Desktop (`~/.cursor/mcp.json`). Prefer **absolute pat
 ```json
 {
   "mcpServers": {
-    "small-ltsc": {
+    "delta-ltsc": {
       "command": "/path/to/venv/bin/python",
-      "args": ["-m", "small.mcp"]
+      "args": ["-m", "delta.mcp"]
     }
   }
 }
 ```
 
-If you see `spawn small-mcp ENOENT`, use an absolute path to your environment's `python` (or `small-mcp`).
+If you see `spawn delta-mcp ENOENT`, use an absolute path to your environment's `python` (or `delta-mcp`).
 
 See [MCP Documentation](docs/mcp.md) for a full setup guide and available tools.
 
 ## Architecture
 
 ```
-small/                          # Python package
+delta/                          # Python package
 ├── compressor.py               # Core compress/decompress API
 ├── config.py                   # Configuration dataclass
 ├── engine.py                   # Compression pipeline
@@ -317,7 +317,7 @@ Typical results on structured inputs:
 
 ```bash
 pytest                              # Run all tests
-pytest --cov=small --cov-report=html  # With coverage
+pytest --cov=delta --cov-report=html  # With coverage
 ```
 
 ### TypeScript
@@ -348,14 +348,14 @@ cargo test                          # Unit tests
 
 ## Citation
 
-If you use Small in your research, please cite:
+If you use Delta in your research, please cite:
 
 ```bibtex
 @software{small2026,
-  title={Small: Lossless Token Sequence Compression for Large Language Models},
+  title={Delta: Lossless Token Sequence Compression for Large Language Models},
   author={{Triage Sec}},
   year={2026},
-  url={https://github.com/triage-sec/small}
+  url={https://github.com/delta-ltsc/delta}
 }
 ```
 
@@ -379,7 +379,7 @@ Contributions are welcome. Please ensure:
 
 1. All tests pass (`pytest` for Python, `npm test` for TypeScript)
 2. Code is formatted (`ruff format` for Python, `prettier` for TypeScript)
-3. Type hints are complete (`mypy small/` for Python)
+3. Type hints are complete (`mypy delta/` for Python)
 4. New features include tests and documentation
 
 ## Acknowledgments

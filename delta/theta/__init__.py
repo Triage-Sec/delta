@@ -14,7 +14,7 @@ Example:
 from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = version("small-ltsc")
+    __version__ = version("theta-ltsc")
 except PackageNotFoundError:  # pragma: no cover
     # Fallback for editable installs without metadata or direct source usage.
     __version__ = "0.0.0"

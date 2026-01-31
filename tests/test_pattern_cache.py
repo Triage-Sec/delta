@@ -10,9 +10,9 @@ from pathlib import Path
 
 import pytest
 
-from small.compressor import compress
-from small.config import CompressionConfig
-from small.pattern_cache import BloomFilter, PatternCache, PatternEntry, _pattern_hash
+from delta.compressor import compress
+from delta.config import CompressionConfig
+from delta.pattern_cache import BloomFilter, PatternCache, PatternEntry, _pattern_hash
 
 
 class TestPatternHash:
@@ -366,9 +366,9 @@ class TestPatternCacheMCPIntegration:
 
     def test_mcp_tools_with_cache(self) -> None:
         """Test that MCP tools work with pattern cache."""
-        from small.mcp.config import MCPConfig
-        from small.mcp.metrics import MetricsStore
-        from small.mcp.tools import ToolHandlers
+        from delta.mcp.config import MCPConfig
+        from delta.mcp.metrics import MetricsStore
+        from delta.mcp.tools import ToolHandlers
 
         cache = PatternCache(max_patterns=100, min_frequency=1)
         config = MCPConfig(enable_pattern_cache=True)
@@ -395,9 +395,9 @@ class TestPatternCacheMCPIntegration:
 
     def test_mcp_tools_without_cache(self) -> None:
         """Test that MCP tools work when cache is disabled."""
-        from small.mcp.config import MCPConfig
-        from small.mcp.metrics import MetricsStore
-        from small.mcp.tools import ToolHandlers
+        from delta.mcp.config import MCPConfig
+        from delta.mcp.metrics import MetricsStore
+        from delta.mcp.tools import ToolHandlers
 
         config = MCPConfig(enable_pattern_cache=False)
         metrics = MetricsStore()

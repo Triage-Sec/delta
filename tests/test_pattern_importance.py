@@ -1,7 +1,7 @@
 """Tests for pattern importance scoring."""
 
 import pytest
-from small.pattern_importance import (
+from delta.pattern_importance import (
     PositionalImportanceScorer,
     FrequencyImportanceScorer,
     LengthImportanceScorer,
@@ -10,7 +10,7 @@ from small.pattern_importance import (
     adjust_candidate_priorities,
     filter_high_importance_candidates,
 )
-from small.types import Candidate
+from delta.types import Candidate
 
 
 def _make_candidate(subseq: tuple, positions: tuple[int, ...], priority: int = 0) -> Candidate:

@@ -2,7 +2,7 @@
 //!
 //! These tests verify the complete compression pipeline works correctly.
 
-use small_ltsc_core::*;
+use delta_ltsc_core::*;
 
 // TODO: Investigate why suffix array discovery isn't finding patterns correctly.
 // The pattern [1,2,3] x 5 = 15 tokens should compress to ~12 tokens.

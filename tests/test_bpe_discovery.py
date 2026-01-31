@@ -1,14 +1,14 @@
 """Tests for BPE-style pattern discovery."""
 
 import pytest
-from small.bpe_discovery import (
+from delta.bpe_discovery import (
     _count_adjacent_pairs,
     _find_pair_positions,
     _compute_merge_savings,
     discover_bpe_candidates,
     discover_extended_bpe_candidates,
 )
-from small.config import CompressionConfig
+from delta.config import CompressionConfig
 
 
 def test_count_adjacent_pairs():

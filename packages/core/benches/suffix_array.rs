@@ -4,10 +4,10 @@
 
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 use rand::Rng;
-use small_ltsc_core::suffix_array::SuffixArray;
+use delta_ltsc_core::suffix_array::SuffixArray;
 
 #[cfg(feature = "parallel")]
-use small_ltsc_core::suffix_array_parallel::{build_suffix_array_parallel, ParallelSAConfig};
+use delta_ltsc_core::suffix_array_parallel::{build_suffix_array_parallel, ParallelSAConfig};
 
 /// Generate tokens with repeated patterns (realistic for compression).
 fn generate_repeated_pattern(size: usize, pattern_len: usize) -> Vec<u32> {

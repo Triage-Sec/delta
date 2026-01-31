@@ -3,7 +3,7 @@ import random
 import statistics
 import time
 
-from small import CompressionConfig, compress
+from delta import CompressionConfig, compress
 
 
 def generate_tokens(count: int, vocab_size: int, seed: int) -> list[str]:

@@ -2,8 +2,8 @@
 
 import pytest
 
-from small.config import CompressionConfig
-from small.template_types import (
+from delta.config import CompressionConfig
+from delta.template_types import (
     SlotMarker,
     Template,
     TemplateCandidate,
@@ -11,21 +11,21 @@ from small.template_types import (
     compute_frame_ratio,
     frame_to_string,
 )
-from small.template_discovery import (
+from delta.template_discovery import (
     discover_templates,
     discover_templates_simple,
     _align_sequences,
     _find_similar_groups,
     _extract_slot_values,
 )
-from small.template_serialization import (
+from delta.template_serialization import (
     serialize_template_frame,
     serialize_template_instance,
     deserialize_template_instance,
     expand_template_instance,
     parse_template_frame,
 )
-from small.compressor import compress, decompress
+from delta.compressor import compress, decompress
 
 
 # ============================================================================
@@ -434,7 +434,7 @@ class TestTemplateIntegration:
 
     def test_template_discovery_stage_in_engine(self):
         """Test that template discovery integrates with engine."""
-        from small.engine import default_engine, TemplateDiscoveryStage
+        from delta.engine import default_engine, TemplateDiscoveryStage
 
         config = CompressionConfig(
             enable_template_extraction=True,
@@ -448,7 +448,7 @@ class TestTemplateIntegration:
 
     def test_template_not_added_when_disabled(self):
         """Test that template stage is not added when disabled."""
-        from small.engine import default_engine
+        from delta.engine import default_engine
 
         config = CompressionConfig(
             enable_template_extraction=False,

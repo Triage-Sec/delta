@@ -5,9 +5,9 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from small.config import CompressionConfig
-from small.compressor import compress
-from small.quality_monitor import (
+from delta.config import CompressionConfig
+from delta.compressor import compress
+from delta.quality_monitor import (
     MonitoringConfig,
     QualityBaseline,
     QualityMonitor,
@@ -17,7 +17,7 @@ from small.quality_monitor import (
     get_global_monitor,
     set_global_monitor,
 )
-from small.quality_alerts import (
+from delta.quality_alerts import (
     AlertManager,
     AlertRule,
     AlertSeverity,
@@ -25,7 +25,7 @@ from small.quality_alerts import (
     check_thresholds,
     format_alerts_ascii,
 )
-from small.quality_export import (
+from delta.quality_export import (
     export_prometheus,
     export_summary_ascii,
     export_health_ascii,

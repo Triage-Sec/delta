@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from small import CompressionConfig, compress
+from delta import CompressionConfig, compress
 
 
 def test_regression_corpus():

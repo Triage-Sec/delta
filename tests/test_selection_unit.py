@@ -1,6 +1,6 @@
-from small import CompressionConfig
-from small.discovery import discover_candidates
-from small.selection import select_occurrences
+from delta import CompressionConfig
+from delta.discovery import discover_candidates
+from delta.selection import select_occurrences
 
 
 def test_selection_optimal_beats_greedy():

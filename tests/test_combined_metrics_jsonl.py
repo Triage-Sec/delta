@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from small.metrics import CompressionMetrics
-from small.metrics_writer import write_combined_metrics_jsonl
+from delta.metrics import CompressionMetrics
+from delta.metrics_writer import write_combined_metrics_jsonl
 
 
 def test_combined_metrics_writer(tmp_path: Path):

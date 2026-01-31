@@ -10,17 +10,17 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 ML_DIR="$ROOT_DIR/packages/ml"
 SDK_DIR="$ROOT_DIR/packages/sdk"
 
-echo "Building Small LTSC ML package..."
+echo "Building Delta LTSC ML package..."
 echo "ML dir: $ML_DIR"
 
 cd "$ML_DIR"
 
 # Link to local SDK for development
-if [ ! -d "node_modules/@small-ltsc/sdk" ] && [ -d "$SDK_DIR/dist" ]; then
+if [ ! -d "node_modules/@delta-ltsc/sdk" ] && [ -d "$SDK_DIR/dist" ]; then
     echo "Linking local SDK..."
-    mkdir -p node_modules/@small-ltsc
-    rm -rf node_modules/@small-ltsc/sdk
-    ln -sf "$SDK_DIR" node_modules/@small-ltsc/sdk
+    mkdir -p node_modules/@delta-ltsc
+    rm -rf node_modules/@delta-ltsc/sdk
+    ln -sf "$SDK_DIR" node_modules/@delta-ltsc/sdk
 fi
 
 # Install dev dependencies only (skip peer deps)

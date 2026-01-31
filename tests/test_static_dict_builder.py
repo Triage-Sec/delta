@@ -1,5 +1,5 @@
-from small import CompressionConfig
-from small.static_dict_builder import StaticDictionaryConfig, build_static_dictionary
+from delta import CompressionConfig
+from delta.static_dict_builder import StaticDictionaryConfig, build_static_dictionary
 
 
 def test_static_dictionary_builder_basic():

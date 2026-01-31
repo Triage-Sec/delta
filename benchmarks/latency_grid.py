@@ -1,7 +1,7 @@
 import argparse
 import time
 
-from small import CompressionConfig, compress
+from delta import CompressionConfig, compress
 
 
 def generate_tokens(count: int) -> list[str]:

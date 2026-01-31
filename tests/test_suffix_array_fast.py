@@ -1,13 +1,13 @@
 """Tests for numpy-accelerated suffix array construction."""
 
 import pytest
-from small.suffix_array_fast import (
+from delta.suffix_array_fast import (
     build_suffix_array_fast,
     lcp_intervals_fast,
     should_use_fast_suffix_array,
     SuffixArrayFast,
 )
-from small.suffix_array import build_suffix_array
+from delta.suffix_array import build_suffix_array
 
 
 def test_build_suffix_array_fast_basic():

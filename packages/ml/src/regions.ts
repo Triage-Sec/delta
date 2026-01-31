@@ -7,7 +7,7 @@
  * Port of `small/adaptive.py` region detection to TypeScript.
  */
 
-import type { TokenSeq, DiscoveredPattern } from '@small-ltsc/sdk';
+import type { TokenSeq, DiscoveredPattern } from '@delta-ltsc/sdk';
 
 /**
  * Region types with different compression strategies.

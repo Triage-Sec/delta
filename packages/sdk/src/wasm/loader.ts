@@ -87,7 +87,7 @@ export async function initWasm(): Promise<void> {
         // In Node.js, we need to provide the WASM file path/bytes
         const { readFile } = await import('node:fs/promises');
         const { fileURLToPath } = await import('node:url');
-        const wasmPath = new URL('./pkg/small_ltsc_core_bg.wasm', import.meta.url);
+        const wasmPath = new URL('./pkg/delta_ltsc_core_bg.wasm', import.meta.url);
         const path = fileURLToPath(wasmPath);
         const buffer = await readFile(path);
         await wasmModule.default(buffer);

@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'small/**'
+      - 'delta/**'
       - 'pyproject.toml'
       - 'tests/**'
       - '.github/workflows/python-package.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'small/**'
+      - 'delta/**'
       - 'pyproject.toml'
       - 'tests/**'
   workflow_dispatch:
@@ -42,7 +42,7 @@ jobs:
         run: pytest -v
 
       - name: Type check
-        run: mypy small/ --ignore-missing-imports
+        run: mypy delta/ --ignore-missing-imports
 
   lint:
     name: Lint
@@ -59,10 +59,10 @@ jobs:
         run: pip install ruff==0.14.14
 
       - name: Run ruff check
-        run: ruff check small/
+        run: ruff check delta/
 
       - name: Run ruff format check
-        run: ruff format --check small/
+        run: ruff format --check delta/
 
   publish:
     name: Publish to PyPI
@@ -71,7 +71,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     environment:
       name: pypi
-      url: https://pypi.org/p/small-ltsc
+      url: https://pypi.org/p/delta-ltsc
     permissions:
       id-token: write
     steps:

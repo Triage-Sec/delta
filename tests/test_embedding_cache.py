@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from small.embedding_cache import SQLiteCacheConfig, SQLiteEmbeddingCache
+from delta.embedding_cache import SQLiteCacheConfig, SQLiteEmbeddingCache
 
 
 def test_sqlite_cache_round_trip(tmp_path: Path):

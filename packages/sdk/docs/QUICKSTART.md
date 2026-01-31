@@ -5,13 +5,13 @@ Get started with Small LTSC in under 5 minutes. This guide covers the most commo
 ## Installation
 
 ```bash
-npm install @small-ltsc/sdk
+npm install @delta-ltsc/sdk
 ```
 
 ## Basic Usage
 
 ```typescript
-import { compress, decompress, initWasm } from '@small-ltsc/sdk';
+import { compress, decompress, initWasm } from '@delta-ltsc/sdk';
 
 // Initialize WASM (required once, auto-called if you forget)
 await initWasm();
@@ -34,7 +34,7 @@ console.assert(JSON.stringify(tokens) === JSON.stringify(restored));
 ### OpenAI / Anthropic Pattern
 
 ```typescript
-import { compress, decompress, initWasm } from '@small-ltsc/sdk';
+import { compress, decompress, initWasm } from '@delta-ltsc/sdk';
 import { encoding_for_model } from 'tiktoken';
 
 // Setup
@@ -99,7 +99,7 @@ const result = await compress(tokens, {
 For inputs over 50K tokens, use streaming:
 
 ```typescript
-import { createStreamingCompressor } from '@small-ltsc/sdk';
+import { createStreamingCompressor } from '@delta-ltsc/sdk';
 
 const compressor = await createStreamingCompressor();
 
@@ -117,7 +117,7 @@ const result = await compressor.finish();
 Use pre-built dictionaries for domain-specific compression:
 
 ```typescript
-import { compress, loadStaticDictionary } from '@small-ltsc/sdk';
+import { compress, loadStaticDictionary } from '@delta-ltsc/sdk';
 
 // Load a built-in dictionary
 const result = await compress(pythonCodeTokens, {
@@ -132,7 +132,7 @@ const result = await compress(pythonCodeTokens, {
 For CPU-intensive compression without blocking:
 
 ```typescript
-import { createWorkerPool } from '@small-ltsc/sdk';
+import { createWorkerPool } from '@delta-ltsc/sdk';
 
 // Create a pool (defaults to CPU count)
 const pool = await createWorkerPool(4);
@@ -150,7 +150,7 @@ Works in all modern browsers:
 
 ```html
 <script type="module">
-  import { compress, decompress, initWasm } from 'https://esm.sh/@small-ltsc/sdk';
+  import { compress, decompress, initWasm } from 'https://esm.sh/@delta-ltsc/sdk';
   
   await initWasm();
   const result = await compress([1, 2, 3, 1, 2, 3]);
@@ -168,7 +168,7 @@ import type {
   CompressionResult,
   TokenSeq,
   StaticDictionaryId,
-} from '@small-ltsc/sdk';
+} from '@delta-ltsc/sdk';
 
 const config: CompressionConfig = {
   maxSubsequenceLength: 10,

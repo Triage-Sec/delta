@@ -4,7 +4,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-Small is a research-grade lossless token sequence compression system for LLMs. It replaces repeated multi-token patterns with compact meta-token references, achieving compression on structured inputs while guaranteeing perfect reconstruction.
+Delta is a research-grade lossless token sequence compression system for LLMs. It replaces repeated multi-token patterns with compact meta-token references, achieving compression on structured inputs while guaranteeing perfect reconstruction.
 
 ## Development Commands
 
@@ -21,7 +21,7 @@ pytest
 pytest tests/test_compress.py -v
 
 # Run with coverage
-pytest --cov=small --cov-report=html
+pytest --cov=delta --cov-report=html
 
 # Format code
 ruff format
@@ -30,7 +30,7 @@ ruff format
 ruff check
 
 # Type checking
-mypy small/
+mypy delta/
 ```
 
 ### Monorepo Packages
@@ -67,28 +67,28 @@ python benchmarks/length_compare.py --tokens 8192 --lengths 2,3,4,5,6
 Tokens → Discovery → Selection → Replacement → Serialization
 ```
 
-1. **Discovery** (`small/discovery*.py`): Finds repeated patterns
+1. **Discovery** (`delta/discovery*.py`): Finds repeated patterns
    - `discovery_sa.py`: Suffix array (default, O(n log n))
    - `discovery.py`: Sliding window (small inputs)
    - `bpe_discovery.py`: BPE-style merging (hierarchical)
    - `ast_python.py`: Python AST-aware
    - `fuzzy.py`: Near-duplicate clustering
 
-2. **Selection** (`small/selection*.py`): Chooses non-overlapping occurrences
+2. **Selection** (`delta/selection*.py`): Chooses non-overlapping occurrences
    - `selection_mode="greedy"`: O(n log n), local optimal
    - `selection_mode="optimal"`: Weighted interval DP
    - `selection_mode="beam"`: Bounded exploration
    - `selection_mode="ilp"`: Global optimal via ILP solver
 
-3. **Replacement** (`small/swap.py`, `small/dictionary.py`): Substitutes patterns with meta-tokens
+3. **Replacement** (`delta/swap.py`, `small/dictionary.py`): Substitutes patterns with meta-tokens
 
-4. **Serialization** (`small/serialization.py`): Produces `<Dict>...</Dict>` format
+4. **Serialization** (`delta/serialization.py`): Produces `<Dict>...</Dict>` format
 
 ### Key Entry Points
 
-- `small/compressor.py`: Public API (`compress()`, `decompress()`)
-- `small/engine.py`: Pipeline orchestration (`CompressionEngine`)
-- `small/config.py`: All configuration options (`CompressionConfig`)
+- `delta/compressor.py`: Public API (`compress()`, `decompress()`)
+- `delta/engine.py`: Pipeline orchestration (`CompressionEngine`)
+- `delta/config.py`: All configuration options (`CompressionConfig`)
 
 ### ML Integration
 
@@ -100,7 +100,7 @@ Optional features controlled via `CompressionConfig`:
 
 ### Monorepo Structure
 
-- `small/`: Python core library
+- `delta/`: Python core library
 - `packages/core/`: Rust WASM implementation
 - `packages/sdk/`: TypeScript SDK (wraps WASM)
 - `packages/ml/`: TypeScript ML utilities for client-side quality prediction
@@ -115,8 +115,8 @@ Test fixtures are in `tests/fixtures/`:
 
 Use `conftest.py` fixtures for corpus loading:
 ```python
-def test_something(python_small_corpus):
-    for doc in python_small_corpus:
+def test_something(python_delta_corpus):
+    for doc in python_delta_corpus:
         # doc is a CorpusDocument
         pass
 ```

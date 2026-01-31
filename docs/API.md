@@ -23,7 +23,7 @@ Compress a token sequence using the configured strategy.
 
 **Example:**
 ```python
-from small import compress, CompressionConfig
+from delta import compress, CompressionConfig
 
 result = compress(["a", "b", "a", "b"], CompressionConfig())
 print(result.compressed_length)
@@ -471,7 +471,7 @@ Factory function to create embedding providers by name.
 
 **Example:**
 ```python
-from small.embeddings import create_provider
+from delta.embeddings import create_provider
 
 # OpenAI (uses OPENAI_API_KEY env var)
 provider = create_provider("openai", model="text-embedding-3-small")

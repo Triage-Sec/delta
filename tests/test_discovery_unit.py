@@ -1,5 +1,5 @@
-from small import CompressionConfig
-from small.discovery import discover_candidates
+from delta import CompressionConfig
+from delta.discovery import discover_candidates
 
 
 def test_discovery_known_patterns():
